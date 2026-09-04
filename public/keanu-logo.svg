@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Keanu">
+  <g fill="none" stroke="#F2EFE9" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5.5 29.5V14a10.5 10.5 0 0 1 21 0v15.5"/>
+    <path d="M12.4 10.6v11.6"/>
+    <path d="M19.6 10.6 12.4 17l7.2 5.2"/>
+  </g>
+</svg>

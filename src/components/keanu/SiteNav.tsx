@@ -13,14 +13,18 @@ export function SiteNav() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="relative z-20 w-full px-6 py-5 lg:px-8">
-      <div className="flex items-center justify-between">
+    <header className="pointer-events-auto relative z-20 w-full px-6 py-5 lg:px-8">
+      <div className="mx-auto flex max-w-[520px] items-center justify-between">
         <button
           type="button"
           onClick={() => goTo(0)}
-          className="font-display text-lg font-medium tracking-tight text-fg"
+          className="flex items-center gap-2 text-fg"
+          aria-label="Keanu — home"
         >
-          Keanu
+          <img src="/keanu-logo.svg" alt="" className="size-6 shrink-0" />
+          <span className="font-display text-sm font-medium tracking-[0.22em]">
+            KEANU
+          </span>
         </button>
 
         <div className="hidden items-center gap-8 lg:flex">
@@ -66,7 +70,6 @@ export function SiteNav() {
           </span>
         </button>
       </div>
-      <div className="mt-[3px] h-px bg-gradient-to-r from-transparent via-fg/20 to-transparent" />
 
       <div
         className={cn(

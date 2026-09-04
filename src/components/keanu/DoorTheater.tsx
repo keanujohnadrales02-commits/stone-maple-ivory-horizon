@@ -72,6 +72,7 @@ export function DoorTheater({ children }: Props) {
   const [isBusy, setIsBusy] = useState(false);
   const busy = useRef(false);
   const raf = useRef(0);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const touchY = useRef<number | null>(null);
   const indexRef = useRef(0);
   const sceneRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -79,12 +80,20 @@ export function DoorTheater({ children }: Props) {
   indexRef.current = index;
 
   const goTo = useCallback((next: number) => {
-    if (busy.current) return;
     const from = indexRef.current;
     const clamped = Math.max(0, Math.min(SCENES.length - 1, next));
     if (clamped === from) return;
 
+    // A warp may already be running: cancel it and start this one.
+    cancelAnimationFrame(raf.current);
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+
     if (prefersReducedMotion()) {
+      busy.current = false;
+      setIsBusy(false);
       setIndex(clamped);
       setIncoming(null);
       setProgress(0);
@@ -105,6 +114,27 @@ export function DoorTheater({ children }: Props) {
       void vid.play().catch(() => undefined);
     }
 
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      cancelAnimationFrame(raf.current);
+      if (timer.current) {
+        clearTimeout(timer.current);
+        timer.current = null;
+      }
+      setIndex(clamped);
+      setIncoming(null);
+      setProgress(0);
+      busy.current = false;
+      setIsBusy(false);
+      const v = warpVideoRef.current;
+      if (v) {
+        v.pause();
+        v.currentTime = 0;
+      }
+    };
+
     const start = performance.now();
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
@@ -112,21 +142,22 @@ export function DoorTheater({ children }: Props) {
       if (t < 1) {
         raf.current = requestAnimationFrame(tick);
       } else {
-        setIndex(clamped);
-        setIncoming(null);
-        setProgress(0);
-        busy.current = false;
-        setIsBusy(false);
-        if (vid) {
-          vid.pause();
-          vid.currentTime = 0;
-        }
+        finish();
       }
     };
     raf.current = requestAnimationFrame(tick);
+
+    // Never leave busy=true forever, even if rAF stalls or the tab backgrounds.
+    timer.current = setTimeout(finish, duration + 200);
   }, []);
 
-  useEffect(() => () => cancelAnimationFrame(raf.current), []);
+  useEffect(
+    () => () => {
+      cancelAnimationFrame(raf.current);
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     const scrollerOf = () => sceneRefs.current[indexRef.current];
@@ -142,10 +173,7 @@ export function DoorTheater({ children }: Props) {
     };
 
     const onWheel = (e: WheelEvent) => {
-      if (busy.current) {
-        e.preventDefault();
-        return;
-      }
+      if (busy.current) return;
       if (!atBoundary(e.deltaY)) return;
       const dir = e.deltaY > 0 ? 1 : -1;
       const next = indexRef.current + dir;
@@ -246,7 +274,7 @@ export function DoorTheater({ children }: Props) {
                 className={cn(
                   "absolute inset-0 overflow-x-hidden overflow-y-auto",
                   isEnter ? "z-[1]" : "z-[2]",
-                  (isEnter || transitioning) && "pointer-events-none",
+                  isEnter && "pointer-events-none",
                 )}
                 aria-hidden={!isLeave || transitioning}
               >
