@@ -1,13 +1,11 @@
 import { useState } from "react";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SCENES, useDoor } from "./DoorTheater";
 
-const LINKS: { label: string; scene: number; chevron?: boolean }[] = [
-  { label: "How it works", scene: 1, chevron: true },
+const LINKS: { label: string; scene: number }[] = [
+  { label: "How it works", scene: 1 },
   { label: "Projects", scene: 2 },
-  { label: "Plans", scene: 3 },
-  { label: "Learning", scene: 3, chevron: true },
 ];
 
 export function SiteNav() {
@@ -31,10 +29,9 @@ export function SiteNav() {
               key={link.label}
               type="button"
               onClick={() => goTo(link.scene)}
-              className="flex items-center gap-1 text-sm text-fg/90 transition-opacity hover:opacity-70"
+              className="text-sm text-fg/90 transition-opacity hover:opacity-70"
             >
               {link.label}
-              {link.chevron ? <ChevronDown className="size-3.5 opacity-70" /> : null}
             </button>
           ))}
         </div>

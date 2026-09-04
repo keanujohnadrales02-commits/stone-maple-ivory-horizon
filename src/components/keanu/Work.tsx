@@ -1,407 +1,356 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { X } from "lucide-react";
 import { SiteNav, SceneHint } from "./SiteNav";
 
-/* ------------------------------------------------------------------ *
- * Real captures live in public/projects/.
- * Each shot is HEAD-checked at runtime: if the PNG is not there yet the
- * card falls back to the SVG graph, and the moment the file exists both
- * the card and the dialog show the photo instead.
- * ------------------------------------------------------------------ */
+type Lane = {
+  src: string;
+  label: string;
+  summary: string;
+  steps: string[];
+};
 
-const FRONT_DESK = {
-  id: "front-desk",
-  shot: "/projects/front-desk.png",
-  extras: ["/projects/front-desk-error.png", "/projects/front-desk-reminders.png", "/projects/front-desk-leads.png"],
-  badge: "● Built & Tested",
-  title: "AI Front Desk for a Dental Practice",
-  body: "Five n8n workflows as one system: booking, FAQ, lead capture, reminders and recall. An error handler watches the other four when they fail.",
-  meta: "5 workflows · 1 error lane · live in clinic chat + Messenger",
-  tags: ["n8n", "Google Calendar", "Gmail"],
-  alt: "n8n canvas for the AI Front Desk system",
-} as const;
+type Project = {
+  id: string;
+  kicker: string;
+  title: string;
+  short: string;
+  body: string;
+  tags: string[];
+  shot: string;
+  lanes: Lane[];
+  graph: "front" | "social" | "zapier";
+  dark: boolean;
+};
 
-const SOCIAL = {
-  id: "social-followup",
-  shot: "/projects/social-followup.png",
-  extras: ["/projects/social-followup-sheet.png"],
-  badge: "Sample",
-  title: "Enquiry to Social Follow-up",
-  body: "Multi-channel lead capture from website, Facebook, and WhatsApp.",
-  meta: "",
-  tags: ["Make.com", "Google Sheets", "Gmail"],
-  alt: "Make.com scenario for the Enquiry to Social Follow-up flow",
-} as const;
-
-/** Zapier — its own card. Never merged with the n8n or Make work. */
-const ZAPIER = {
-  id: "zapier",
-  shot: "/projects/zapier-lead-routing.png",
-  extras: ["/projects/zapier-apollo.png"],
-  badge: "Sample",
-  title: "Form to Sheet, Gmail and Slack",
-  body: "A webhook catches the enquiry, writes it to Google Sheets, sends the acknowledgement by Gmail, then posts the team notification to Slack. The second capture is the same intake split by Paths — high priority leads are written to Sheets and answered by an AI-drafted Gmail reply, everything else falls through to a notification.",
-  meta: "",
-  tags: ["Zapier", "Paths", "Google Sheets", "Gmail", "Slack"],
-  alt: "Zapier canvas — webhook to Google Sheets, Gmail and Slack",
-} as const;
-
-type Project = typeof FRONT_DESK | typeof SOCIAL | typeof ZAPIER;
-
-/** true = file exists and is an image, false = missing, null = still checking. */
-function useShot(src: string) {
-  const [ok, setOk] = useState<boolean | null>(null);
-  useEffect(() => {
-    let alive = true;
-    fetch(src, { method: "HEAD" })
-      .then((r) => {
-        // Vite's SPA fallback answers 200 text/html for missing files, so the
-        // content type is what actually decides whether a capture is there.
-        const type = r.headers.get("content-type") ?? "";
-        if (alive) setOk(r.ok && type.startsWith("image"));
-      })
-      .catch(() => {
-        if (alive) setOk(false);
-      });
-    return () => {
-      alive = false;
-    };
-  }, [src]);
-  return ok;
-}
-
-function useShots(srcs: readonly string[]) {
-  const [found, setFound] = useState<string[]>([]);
-  useEffect(() => {
-    let alive = true;
-    Promise.all(
-      srcs.map((src) =>
-        fetch(src, { method: "HEAD" })
-          .then((r) => {
-            const type = r.headers.get("content-type") ?? "";
-            return r.ok && type.startsWith("image") ? src : null;
-          })
-          .catch(() => null),
-      ),
-    ).then((list) => {
-      if (alive) setFound(list.filter((s): s is string => s !== null));
-    });
-    return () => {
-      alive = false;
-    };
-  }, [srcs]);
-  return found;
-}
+const PROJECTS: Project[] = [
+  {
+    id: "front-desk",
+    kicker: "n8n",
+    title: "AI Front Desk for a Dental Practice",
+    short: "AI Front Desk",
+    body: "Chat books the visit. Reminders, leads, and an error lane sit beside it.",
+    tags: ["n8n", "Anthropic", "Google Calendar", "Gmail", "Sheets"],
+    shot: "/projects/front-desk.png",
+    dark: true,
+    graph: "front",
+    lanes: [
+      {
+        src: "/projects/front-desk.png",
+        label: "Booking",
+        summary: "A patient writes in website chat. One agent runs the appointment.",
+        steps: [
+          "Reads the calendar and existing bookings",
+          "Books, moves, or cancels the visit",
+          "Emails the confirmation",
+          "Logs the booking on a sheet",
+        ],
+      },
+      {
+        src: "/projects/front-desk-error.png",
+        label: "Errors",
+        summary: "If another workflow fails, this one catches it so the rest keep running.",
+        steps: [
+          "Classifies what broke",
+          "Writes it to an error log",
+          "Retries when it is safe to retry",
+          "Emails the team only if it is critical",
+        ],
+      },
+      {
+        src: "/projects/front-desk-reminders.png",
+        label: "Reminders",
+        summary: "Two clocks. Nobody on staff has to send these emails.",
+        steps: [
+          "Every day at 8am: people with a visit in the next 1–2 days get a reminder",
+          "Every Monday at 8am: people from about six months ago get a recall",
+          "Each send is written back to the patient sheet",
+        ],
+      },
+      {
+        src: "/projects/front-desk-leads.png",
+        label: "Leads",
+        summary: "A form on the website becomes a row, a reply, and a ping to staff.",
+        steps: [
+          "The form posts into n8n",
+          "Fields are cleaned up",
+          "The lead is saved to Google Sheets",
+          "The person gets an auto-reply",
+          "Staff get an email",
+        ],
+      },
+    ],
+  },
+  {
+    id: "social-followup",
+    kicker: "Make.com",
+    title: "Enquiry to Social Follow-up",
+    short: "Social follow-up",
+    body: "Enquiry is logged, then answered on email, Messenger, or WhatsApp.",
+    tags: ["Make.com", "Google Sheets", "Gmail", "Messenger", "WhatsApp"],
+    shot: "/projects/social-followup.png",
+    dark: false,
+    graph: "social",
+    lanes: [
+      {
+        src: "/projects/social-followup.png",
+        label: "Scenario",
+        summary: "This is Make, not n8n. One webhook, one sheet, then a split by channel.",
+        steps: [
+          "The enquiry arrives",
+          "It is saved as a row",
+          "If they came from Facebook, Messenger replies",
+          "If they came from WhatsApp, WhatsApp replies",
+          "You also get an email",
+        ],
+      },
+      {
+        src: "/projects/social-followup-sheet.png",
+        label: "The sheet",
+        summary: "This is the log the scenario writes to.",
+        steps: [
+          "Columns: time, name, email, phone, channel, message, status",
+          "Each new enquiry becomes one row",
+          "Nothing is typed in by hand",
+        ],
+      },
+    ],
+  },
+  {
+    id: "zapier-routing",
+    kicker: "Zapier",
+    title: "Lead Routing with Priority Paths",
+    short: "Lead routing",
+    body: "Referrals get a drafted email. Everyone else notifies sales.",
+    tags: ["Zapier", "Google Sheets", "Gmail", "AI by Zapier"],
+    shot: "/projects/zapier-apollo.png",
+    dark: false,
+    graph: "zapier",
+    lanes: [
+      {
+        src: "/projects/zapier-apollo.png",
+        label: "Paths",
+        summary: "One webhook. Two paths. Referrals get a drafted email. Everyone else notifies sales.",
+        steps: [
+          "The lead hits the webhook",
+          "If they are a referral: save the row, AI drafts a reply, Gmail sends it to the client",
+          "Anyone else: Gmail notifies the sales team",
+        ],
+      },
+    ],
+  },
+];
 
 export function Work() {
-  const [open, setOpen] = useState<Project | null>(null);
-  const close = useCallback(() => setOpen(null), []);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [laneSrc, setLaneSrc] = useState<string | null>(null);
+  const open = PROJECTS.find((p) => p.id === openId) ?? null;
+  const lane =
+    open?.lanes.find((l) => l.src === laneSrc) ?? open?.lanes[0] ?? null;
 
-  const frontDeskShot = useShot(FRONT_DESK.shot);
-  const socialShot = useShot(SOCIAL.shot);
-  const zapierShot = useShot(ZAPIER.shot);
+  useEffect(() => {
+    setLaneSrc(open?.shot ?? null);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   return (
-    <section className="flex min-h-dvh flex-col bg-bg">
+    <section className="relative flex min-h-dvh flex-col bg-bg">
       <SiteNav />
-      <div className="mx-auto flex w-full max-w-[1180px] flex-1 flex-col justify-center px-6 py-8 lg:px-8">
-        <p className="mb-3.5 text-[11px] font-medium tracking-[0.18em] text-violet">
+      <div className="mx-auto flex w-full max-w-[1080px] flex-1 flex-col justify-center px-6 py-8 lg:px-8">
+        <p className="mb-2 text-[11px] font-medium tracking-[0.18em] text-violet">
           PROJECTS
         </p>
-        <h2 className="font-display mb-7 text-[34px] leading-[1.05] font-normal tracking-tight text-fg md:text-[44px]">
+        <h2 className="font-display mb-8 text-[28px] leading-[1.1] font-normal tracking-tight text-fg md:text-[36px]">
           What I've built
         </h2>
 
-        {/* ---------------- Flagship ---------------- */}
-        <button
-          type="button"
-          onClick={() => setOpen(FRONT_DESK)}
-          aria-label={`Open project: ${FRONT_DESK.title}`}
-          className="group block w-full overflow-hidden rounded-[20px] border border-line bg-surface text-left transition-colors hover:border-violet/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet/70"
-        >
-          <div className="grid min-h-[58dvh] grid-cols-1 lg:min-h-[560px] lg:grid-cols-[1.75fr_0.85fr]">
-            <div className="relative overflow-hidden bg-[#101018]">
-              {frontDeskShot ? (
-                <img
-                  src={FRONT_DESK.shot}
-                  alt={FRONT_DESK.alt}
-                  className="absolute inset-0 h-full w-full object-cover object-left-top"
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center p-7">
-                  <FrontDeskGraph />
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col justify-center border-t border-line px-7 py-8 lg:border-t-0 lg:border-l">
-              <span className="mb-3.5 inline-flex w-fit items-center rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] text-emerald-300">
-                {FRONT_DESK.badge}
-              </span>
-              <h3 className="mb-3 font-display text-[26px] font-medium tracking-tight text-fg">
-                {FRONT_DESK.title}
-              </h3>
-              <p className="mb-5 text-[14.5px] leading-relaxed text-muted">
-                {FRONT_DESK.body}
-              </p>
-              <TagRow tags={FRONT_DESK.tags} />
-              <p className="mt-4 text-xs tracking-wide text-muted">{FRONT_DESK.meta}</p>
-              <span className="mt-5 inline-flex w-fit items-center gap-1.5 text-[13px] font-medium text-violet">
-                Open project
-                <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
-                  →
-                </span>
-              </span>
-            </div>
-          </div>
-        </button>
-
-        {/* ---------------- Also shipped ---------------- */}
-        <p className="mt-6 mb-3 text-xs tracking-[0.14em] text-muted">ALSO SHIPPED</p>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-          <button
-            type="button"
-            onClick={() => setOpen(SOCIAL)}
-            aria-label={`Open project: ${SOCIAL.title}`}
-            className="group block overflow-hidden rounded-[20px] border border-line bg-surface text-left transition-colors hover:border-violet/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet/70"
-          >
-            <div
-              className="relative h-[240px] overflow-hidden"
-              style={{ background: socialShot ? "#101018" : "#f3f1ec" }}
-            >
-              {socialShot ? (
-                <img
-                  src={SOCIAL.shot}
-                  alt={SOCIAL.alt}
-                  className="absolute inset-0 h-full w-full object-cover object-left-top"
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <SocialGraph />
-              )}
-            </div>
-            <div className="px-6 py-5">
-              <span className="mb-2.5 inline-flex rounded-full bg-amber-500/15 px-2.5 py-1 text-[11px] text-amber-300">
-                {SOCIAL.badge}
-              </span>
-              <h3 className="mt-2 mb-2 text-xl font-medium text-fg">{SOCIAL.title}</h3>
-              <p className="mb-4 text-sm leading-relaxed text-muted">{SOCIAL.body}</p>
-              <TagRow tags={SOCIAL.tags} />
-              <span className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-violet">
-                Open project
-                <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
-                  →
-                </span>
-              </span>
-            </div>
-          </button>
-
-          {/* Zapier — separate card. Not merged with n8n or Make. */}
-          <button
-            type="button"
-            onClick={() => setOpen(ZAPIER)}
-            aria-label={`Open project: ${ZAPIER.title}`}
-            className="group block overflow-hidden rounded-[20px] border border-line bg-surface text-left transition-colors hover:border-violet/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet/70"
-          >
-            <div
-              className="relative h-[240px] overflow-hidden"
-              style={{ background: zapierShot ? "#f4f2ee" : "#101018" }}
-            >
-              {zapierShot ? (
-                <img
-                  src={ZAPIER.shot}
-                  alt={ZAPIER.alt}
-                  className="absolute inset-0 h-full w-full object-cover object-top"
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <ZapierGraph />
-              )}
-            </div>
-            <div className="px-6 py-5">
-              <span className="mb-2.5 inline-flex rounded-full bg-orange-500/15 px-2.5 py-1 text-[11px] text-orange-300">
-                {ZAPIER.badge}
-              </span>
-              <h3 className="mt-2 mb-2 text-xl font-medium text-fg">{ZAPIER.title}</h3>
-              <p className="mb-4 text-sm leading-relaxed text-muted">{ZAPIER.body}</p>
-              <TagRow tags={ZAPIER.tags} />
-              <span className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-violet">
-                Open project
-                <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
-                  →
-                </span>
-              </span>
-            </div>
-          </button>
-
-          {/* Stack on the bench — reference only, never a case study. */}
-          <article className="overflow-hidden rounded-[20px] border border-line bg-surface">
-            <div className="relative h-[240px] bg-[#101018]">
-              <StackGraph />
-            </div>
-            <div className="px-6 py-5">
-              <p className="mb-2.5 text-[11px] tracking-[0.18em] text-violet">
-                STACK ON THE BENCH
-              </p>
-              <h3 className="mt-2 mb-2 text-xl font-medium text-fg">
-                n8n · Make · OpenAI · Claude
-              </h3>
-              <p className="mb-4 text-sm leading-relaxed text-muted">
-                Sheets, Gmail, Calendar, Messenger, WhatsApp. The workflow is the
-                portfolio — not a grid of empty slots.
-              </p>
-              <TagRow tags={["n8n", "Make.com", "OpenAI", "Claude"]} />
-            </div>
-          </article>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          {PROJECTS.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              onOpen={() => setOpenId(project.id)}
+            />
+          ))}
         </div>
       </div>
       <div className="pb-6">
         <SceneHint label="Step through" />
       </div>
 
-      {open ? <ProjectDialog project={open} onClose={close} /> : null}
+      {open && lane ? (
+        <div
+          className="absolute inset-0 z-30 flex items-end justify-center bg-[#05040a]/80 p-3 backdrop-blur-md md:items-center md:p-6"
+          onWheel={(e) => e.stopPropagation()}
+          onClick={() => setOpenId(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="project-title"
+            className="max-h-[min(94dvh,900px)] w-full max-w-[1120px] overflow-hidden rounded-[20px] border border-line bg-surface"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="grid max-h-[min(94dvh,900px)] grid-cols-1 overflow-y-auto lg:grid-cols-[1.2fr_0.9fr]">
+              <div className={`relative min-h-[240px] ${open.dark ? "bg-[#101018]" : "bg-[#eceae4]"}`}>
+                <Shot
+                  src={lane.src}
+                  className="max-h-[56dvh] min-h-[240px] object-contain lg:max-h-none lg:min-h-full"
+                >
+                  <Graph id={open.graph} />
+                </Shot>
+              </div>
+
+              <div className="flex flex-col border-t border-line px-7 py-7 lg:border-t-0 lg:border-l">
+                <div className="mb-6 flex items-start justify-between gap-4">
+                  <p className="text-[11px] font-medium tracking-[0.18em] text-violet">
+                    {open.kicker}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setOpenId(null)}
+                    className="liquid-glass flex size-9 shrink-0 items-center justify-center rounded-full"
+                    aria-label="Close project"
+                  >
+                    <X className="size-4 text-fg" />
+                  </button>
+                </div>
+
+                <h3
+                  id="project-title"
+                  className="font-display text-[26px] leading-[1.1] font-medium tracking-tight text-fg md:text-[30px]"
+                >
+                  {open.title}
+                </h3>
+
+                {open.lanes.length > 1 ? (
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {open.lanes.map((l) => {
+                      const active = l.src === lane.src;
+                      return (
+                        <button
+                          key={l.src}
+                          type="button"
+                          onClick={() => setLaneSrc(l.src)}
+                          className={`rounded-full px-3 py-1.5 text-[11px] tracking-[0.12em] uppercase ${
+                            active
+                              ? "bg-violet/20 text-fg"
+                              : "text-muted hover:text-fg"
+                          }`}
+                        >
+                          {l.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
+
+                <p className="mt-5 text-[15px] leading-relaxed text-muted">{lane.summary}</p>
+
+                <ul className="mt-5 space-y-2.5">
+                  {lane.steps.map((step) => (
+                    <li key={step} className="flex gap-3 text-[14px] leading-relaxed text-fg/85">
+                      <span className="mt-[7px] size-1 shrink-0 rounded-full bg-violet" />
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-auto flex flex-wrap gap-2 pt-8">
+                  {open.tags.map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-lg border border-line px-2.5 py-1 text-[11px] text-muted"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
 
-function TagRow({ tags }: { tags: readonly string[] }) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {tags.map((t) => (
-        <span
-          key={t}
-          className="rounded-lg border border-line bg-fg/5 px-2.5 py-1 text-xs text-fg/80"
-        >
-          {t}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-/* ------------------------------ Dialog ------------------------------ */
-
-function ProjectDialog({
+function ProjectCard({
   project,
-  onClose,
+  onOpen,
 }: {
   project: Project;
-  onClose: () => void;
+  onOpen: () => void;
 }) {
-  const hasShot = useShot(project.shot);
-  const extras = useShots(project.extras);
-
-  // The room warp listens on window in the bubble phase. Capture-phase
-  // listeners here stop wheel / swipe / arrow keys from changing rooms
-  // underneath the open dialog.
-  useEffect(() => {
-    const swallow = (e: Event) => e.stopPropagation();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-        return;
-      }
-      if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", " "].includes(e.key)) {
-        e.stopPropagation();
-      }
-    };
-    window.addEventListener("wheel", swallow, { capture: true, passive: false });
-    window.addEventListener("touchstart", swallow, true);
-    window.addEventListener("touchend", swallow, true);
-    window.addEventListener("keydown", onKey, true);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("wheel", swallow, true);
-      window.removeEventListener("touchstart", swallow, true);
-      window.removeEventListener("touchend", swallow, true);
-      window.removeEventListener("keydown", onKey, true);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [onClose]);
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
-      onClick={onClose}
-      role="presentation"
+    <button
+      type="button"
+      onClick={onOpen}
+      className="group overflow-hidden rounded-[18px] border border-line bg-surface text-left transition-colors hover:border-violet/40"
     >
       <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={project.title}
-        onClick={(e) => e.stopPropagation()}
-        className="max-h-[92dvh] w-[min(96vw,1180px)] overflow-y-auto rounded-[20px] border border-line bg-surface shadow-2xl"
+        className={`relative h-[168px] ${project.dark ? "bg-[#101018]" : "bg-[#eceae4]"}`}
       >
-        <div className="relative">
-          <div className="relative h-[58dvh] w-full overflow-hidden rounded-t-[20px] bg-[#0b0b12]">
-            {hasShot ? (
-              <img
-                src={project.shot}
-                alt={project.alt}
-                className="absolute inset-0 h-full w-full object-contain"
-              />
-            ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8">
-                {project.id === "front-desk" ? (
-                  <FrontDeskGraph />
-                ) : project.id === "zapier" ? (
-                  <ZapierGraph />
-                ) : (
-                  <SocialGraph dark />
-                )}
-                <p className="text-xs tracking-wide text-muted">
-                  Capture not added yet — drop {project.shot.replace("/projects/", "")} into
-                  public/projects/
-                </p>
-              </div>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="absolute top-4 right-4 grid size-9 place-items-center rounded-full border border-white/15 bg-black/60 text-fg transition-colors hover:bg-black/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet/70"
-          >
-            ✕
-          </button>
-        </div>
-
-        {extras.length > 0 ? (
-          <div className="flex gap-3 overflow-x-auto border-b border-line px-6 py-4">
-            {extras.map((src) => (
-              <img
-                key={src}
-                src={src}
-                alt={`${project.title} — additional capture`}
-                className="h-[128px] w-auto shrink-0 rounded-lg border border-line object-cover object-left-top"
-                loading="lazy"
-              />
-            ))}
-          </div>
-        ) : null}
-
-        <div className="px-6 py-6 lg:px-8">
-          <h3 className="mb-3 font-display text-[26px] font-medium tracking-tight text-fg">
-            {project.title}
-          </h3>
-          <p className="mb-5 max-w-[70ch] text-[15px] leading-relaxed text-muted">
-            {project.body}
-          </p>
-          <TagRow tags={project.tags} />
-          {project.meta ? (
-            <p className="mt-4 text-xs tracking-wide text-muted">{project.meta}</p>
-          ) : null}
-        </div>
+        <Shot src={project.shot} className="h-full object-contain p-3">
+          <Graph id={project.graph} />
+        </Shot>
       </div>
-    </div>
+      <div className="px-5 py-4">
+        <p className="mb-2 text-[10px] font-medium tracking-[0.18em] text-violet">
+          {project.kicker}
+        </p>
+        <h3 className="mb-1.5 text-[17px] font-medium tracking-tight text-fg">
+          {project.short}
+        </h3>
+        <p className="mb-4 line-clamp-2 text-[13px] leading-relaxed text-muted">
+          {project.body}
+        </p>
+        <p className="text-[10px] tracking-[0.16em] text-muted uppercase group-hover:text-violet">
+          View workflow
+        </p>
+      </div>
+    </button>
   );
 }
 
-/* ------------------------------ Graphs ------------------------------ */
+function Graph({ id }: { id: Project["graph"] }) {
+  if (id === "front") return <FrontDeskGraph />;
+  if (id === "social") return <SocialGraph />;
+  return <ZapierGraph />;
+}
+
+function Shot({
+  src,
+  className,
+  children,
+}: {
+  src: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  const [ok, setOk] = useState(false);
+  useEffect(() => {
+    let live = true;
+    setOk(false);
+    fetch(src, { method: "HEAD" })
+      .then((r) => {
+        if (live && r.ok) setOk(true);
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [src]);
+  if (!ok) return <div className={className}>{children}</div>;
+  return <img src={src} alt="" className={`h-full w-full ${className ?? ""}`} />;
+}
 
 function Node({
   className,
@@ -428,163 +377,43 @@ function Node({
   );
 }
 
-/** n8n only. Never shows a Make module. */
 function FrontDeskGraph() {
   return (
-    <div className="relative h-[280px] w-full max-w-[640px]">
-      <svg
-        className="absolute inset-0 h-full w-full"
-        viewBox="0 0 640 280"
-        fill="none"
-        aria-hidden
-      >
+    <div className="relative h-full min-h-[240px] w-full">
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 640 280" fill="none" aria-hidden>
         <path d="M150 140 H250" stroke="rgba(139,124,255,.7)" strokeWidth="1.5" />
-        <path
-          d="M360 140 C430 140, 430 48, 500 48"
-          stroke="rgba(139,124,255,.55)"
-          strokeWidth="1.5"
-        />
+        <path d="M360 140 C430 140, 430 48, 500 48" stroke="rgba(139,124,255,.55)" strokeWidth="1.5" />
         <path d="M360 140 H500" stroke="rgba(139,124,255,.55)" strokeWidth="1.5" />
-        <path
-          d="M360 140 C430 140, 430 200, 500 200"
-          stroke="rgba(139,124,255,.55)"
-          strokeWidth="1.5"
-        />
-        <path
-          d="M360 140 C400 140, 400 250, 240 250"
-          stroke="rgba(248,113,113,.55)"
-          strokeWidth="1.5"
-        />
+        <path d="M360 140 C430 140, 430 200, 500 200" stroke="rgba(139,124,255,.55)" strokeWidth="1.5" />
       </svg>
-      <Node className="top-[118px] left-4" color="bg-blue-400" label="Website Chat Trigger" />
+      <Node className="top-[118px] left-4" color="bg-blue-400" label="Website Chat" />
       <Node className="top-[118px] left-[248px]" color="bg-violet" label="Booking Agent" />
       <Node className="top-7 left-[500px]" color="bg-emerald-400" label="Calendar" />
-      <Node className="top-[118px] left-[500px]" color="bg-emerald-400" label="Sheets" />
-      <Node className="top-[186px] left-[500px]" color="bg-amber" label="Gmail" />
-      <Node className="top-[236px] left-[200px]" color="bg-red-400" label="Error handler" />
+      <Node className="top-[118px] left-[500px]" color="bg-amber" label="Gmail" />
     </div>
   );
 }
 
-/** Make.com only. Never shows an n8n node. */
-function SocialGraph({ dark }: { dark?: boolean }) {
+function SocialGraph() {
   return (
-    <div className="relative h-full min-h-[180px] w-full">
-      <svg
-        className="absolute inset-0 h-full w-full"
-        viewBox="0 0 520 180"
-        fill="none"
-        aria-hidden
-      >
-        <path d="M90 45 C180 45, 180 90, 260 90" stroke="#7c6cf0" strokeWidth="1.6" />
-        <path d="M90 135 C180 135, 180 90, 260 90" stroke="#7c6cf0" strokeWidth="1.6" />
-        <path d="M340 90 H430" stroke="#7c6cf0" strokeWidth="1.6" />
+    <div className="relative h-full w-full">
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 520 180" fill="none" aria-hidden>
+        <path d="M90 90 H250" stroke="#7c6cf0" strokeWidth="1.6" />
+        <path d="M250 90 H400" stroke="#7c6cf0" strokeWidth="1.6" />
       </svg>
-      <Node
-        className="top-6 left-3"
-        color="bg-violet"
-        label="Facebook Messenger"
-        light={!dark}
-      />
-      <Node
-        className="bottom-6 left-3"
-        color="bg-emerald-400"
-        label="WhatsApp"
-        light={!dark}
-      />
-      <Node
-        className="top-[72px] left-[210px]"
-        color="bg-amber"
-        label="Google Sheets"
-        light={!dark}
-      />
-      <Node className="top-[72px] left-[390px]" color="bg-blue-400" label="Gmail" light={!dark} />
+      <Node className="top-[72px] left-3" color="bg-violet" label="Webhook" light />
+      <Node className="top-[72px] left-[210px]" color="bg-amber" label="Sheet" light />
+      <Node className="top-[72px] left-[390px]" color="bg-emerald-400" label="Router" light />
     </div>
   );
 }
 
-/** Zapier only. Never shows an n8n node or a Make module. */
 function ZapierGraph() {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-2.5 px-5">
-      {[
-        { color: "bg-orange-400", label: "Webhooks by Zapier" },
-        { color: "bg-emerald-400", label: "Google Sheets" },
-        { color: "bg-red-400", label: "Gmail" },
-        { color: "bg-violet", label: "Slack" },
-      ].map((n, i) => (
-        <div key={n.label} className="flex flex-col items-center gap-2.5">
-          {i > 0 ? (
-            <svg className="h-3 w-2" viewBox="0 0 8 12" fill="none" aria-hidden>
-              <path d="M4 0 V12" stroke="rgba(139,124,255,.6)" strokeWidth="1.6" />
-            </svg>
-          ) : null}
-          <Chip color={n.color} label={n.label} />
-        </div>
-      ))}
+    <div className="relative h-full w-full overflow-hidden bg-[#f7f6f3]">
+      <Node className="top-4 left-[180px]" color="bg-orange-400" label="Catch Hook" light />
+      <Node className="top-[72px] left-[168px]" color="bg-emerald-400" label="Google Sheets" light />
+      <Node className="bottom-4 left-[196px]" color="bg-red-400" label="Gmail" light />
     </div>
-  );
-}
-
-/**
- * Two independent lanes. n8n and Make are never wired into the same graph.
- *   OpenAI → n8n  → Sheets
- *   Claude → Make → Gmail
- */
-function StackGraph() {
-  return (
-    <div className="flex h-full w-full flex-col justify-center gap-5 px-5 py-5">
-      <Lane
-        from={{ color: "bg-violet", label: "OpenAI" }}
-        via={{ color: "bg-amber", label: "n8n" }}
-        to={{ color: "bg-emerald-400", label: "Sheets" }}
-        stroke="rgba(139,124,255,.65)"
-      />
-      <Lane
-        from={{ color: "bg-magenta", label: "Claude" }}
-        via={{ color: "bg-indigo", label: "Make" }}
-        to={{ color: "bg-blue-400", label: "Gmail" }}
-        stroke="rgba(52,211,153,.55)"
-      />
-    </div>
-  );
-}
-
-function Lane({
-  from,
-  via,
-  to,
-  stroke,
-}: {
-  from: { color: string; label: string };
-  via: { color: string; label: string };
-  to: { color: string; label: string };
-  stroke: string;
-}) {
-  return (
-    <div className="flex items-center gap-2">
-      <Chip color={from.color} label={from.label} />
-      <Connector stroke={stroke} />
-      <Chip color={via.color} label={via.label} />
-      <Connector stroke={stroke} />
-      <Chip color={to.color} label={to.label} />
-    </div>
-  );
-}
-
-function Connector({ stroke }: { stroke: string }) {
-  return (
-    <svg className="h-2 min-w-[18px] flex-1" viewBox="0 0 40 8" fill="none" aria-hidden>
-      <path d="M0 4 H40" stroke={stroke} strokeWidth="1.6" />
-    </svg>
-  );
-}
-
-function Chip({ color, label }: { color: string; label: string }) {
-  return (
-    <span className="inline-flex shrink-0 items-center gap-2 rounded-[10px] border border-white/10 bg-[#1a1b24] px-3 py-2 text-xs whitespace-nowrap text-fg">
-      <span className={`size-1.5 rounded-full ${color}`} />
-      {label}
-    </span>
   );
 }
