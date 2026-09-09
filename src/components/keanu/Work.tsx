@@ -18,7 +18,7 @@ type Project = {
   tags: string[];
   shot: string;
   lanes: Lane[];
-  graph: "front" | "social" | "zapier";
+  graph: "front" | "social" | "zapier" | "cp12n8n" | "cp12make";
   dark: boolean;
 };
 
@@ -134,6 +134,82 @@ const PROJECTS: Project[] = [
           "The lead hits the webhook",
           "If they are a referral: save the row, AI drafts a reply, Gmail sends it to the client",
           "Anyone else: Gmail notifies the sales team",
+        ],
+      },
+    ],
+  },
+  {
+    id: "cp12-n8n",
+    kicker: "n8n",
+    title: "Landlord CP12 Reminders",
+    short: "CP12 reminders",
+    body: "Due in 60 days, they get an email. YES books it. STOP ends it.",
+    tags: ["n8n", "Google Sheets", "Gmail"],
+    shot: "/projects/cp12-n8n.png",
+    dark: true,
+    graph: "cp12n8n",
+    lanes: [
+      {
+        src: "/projects/cp12-n8n.png",
+        label: "Send",
+        summary:
+          "Every morning the sheet is read. Only due certs are emailed. Status becomes Reminded.",
+        steps: [
+          "Schedule 8am",
+          "Read the CP12 sheet",
+          "Skip STOP and Booked",
+          "Due in 60 days",
+          "Gmail",
+          "Mark Reminded",
+        ],
+      },
+      {
+        src: "/projects/cp12-n8n-reply.png",
+        label: "Reply",
+        summary:
+          "Landlord replies. YES pings the plumber. STOP is written on the row so they are never emailed again.",
+        steps: [
+          "New mail",
+          "YES or STOP",
+          "YES emails the plumber and sets Booked",
+          "STOP sets STOP",
+        ],
+      },
+    ],
+  },
+  {
+    id: "cp12-make",
+    kicker: "Make.com",
+    title: "Landlord CP12 Reminders",
+    short: "CP12 on Make",
+    body: "Same job as the n8n CP12. Make, not n8n. Sheet, email, stop on reply.",
+    tags: ["Make.com", "Google Sheets", "Gmail"],
+    shot: "/projects/cp12-make.png",
+    dark: false,
+    graph: "cp12make",
+    lanes: [
+      {
+        src: "/projects/cp12-make.png",
+        label: "Scenario",
+        summary: "This is Make. Schedule, then sheet, then Gmail, then update the row.",
+        steps: [
+          "8am trigger",
+          "Search rows",
+          "Filter due certs",
+          "Send the reminder",
+          "Status Reminded",
+        ],
+      },
+      {
+        src: "/projects/cp12-make-reply.png",
+        label: "Reply",
+        summary: "Router. YES notifies the plumber. STOP is the other path.",
+        steps: [
+          "Watch inbox",
+          "Find their row once",
+          "YES path books it",
+          "STOP path writes STOP",
+          "Anything else is ignored",
         ],
       },
     ],
@@ -323,6 +399,8 @@ function ProjectCard({
 function Graph({ id }: { id: Project["graph"] }) {
   if (id === "front") return <FrontDeskGraph />;
   if (id === "social") return <SocialGraph />;
+  if (id === "cp12n8n") return <Cp12N8nGraph />;
+  if (id === "cp12make") return <Cp12MakeGraph />;
   return <ZapierGraph />;
 }
 
@@ -414,6 +492,34 @@ function ZapierGraph() {
       <Node className="top-4 left-[180px]" color="bg-orange-400" label="Catch Hook" light />
       <Node className="top-[72px] left-[168px]" color="bg-emerald-400" label="Google Sheets" light />
       <Node className="bottom-4 left-[196px]" color="bg-red-400" label="Gmail" light />
+    </div>
+  );
+}
+
+function Cp12N8nGraph() {
+  return (
+    <div className="relative h-full min-h-[240px] w-full">
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 640 280" fill="none" aria-hidden>
+        <path d="M150 140 H250" stroke="rgba(139,124,255,.7)" strokeWidth="1.5" />
+        <path d="M395 140 H500" stroke="rgba(139,124,255,.55)" strokeWidth="1.5" />
+      </svg>
+      <Node className="top-[118px] left-4" color="bg-blue-400" label="Schedule 8am" />
+      <Node className="top-[118px] left-[248px]" color="bg-emerald-400" label="CP12 Sheet" />
+      <Node className="top-[118px] left-[500px]" color="bg-amber" label="Gmail" />
+    </div>
+  );
+}
+
+function Cp12MakeGraph() {
+  return (
+    <div className="relative h-full min-h-[240px] w-full">
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 520 180" fill="none" aria-hidden>
+        <path d="M110 90 H210" stroke="#7c6cf0" strokeWidth="1.6" />
+        <path d="M320 90 H400" stroke="#7c6cf0" strokeWidth="1.6" />
+      </svg>
+      <Node className="top-[72px] left-3" color="bg-violet" label="Schedule 8am" light />
+      <Node className="top-[72px] left-[200px]" color="bg-amber" label="CP12 Sheet" light />
+      <Node className="top-[72px] left-[390px]" color="bg-red-400" label="Gmail" light />
     </div>
   );
 }
