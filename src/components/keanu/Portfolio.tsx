@@ -18,9 +18,10 @@ import {
   CheckCheck,
   Pause,
   Play,
+  RotateCcw,
 } from "lucide-react";
 import { PROJECTS, type Project } from "./projects";
-import { CONTACT_EMAIL } from "./contact-config";
+import { CONTACT_EMAIL, ENQUIRY_WEBHOOK_URL } from "./contact-config";
 
 const tools = ["GoHighLevel", "n8n", "Make.com", "Zapier", "Google Sheets", "Other"];
 const outcomes = [
@@ -531,24 +532,102 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
   );
 }
 
+type SendState = "idle" | "sending" | "sent" | "failed";
+
+interface Enquiry {
+  name: string;
+  email: string;
+  business: string;
+  tools: string[];
+  problem: string;
+}
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const MIN_PROBLEM_LENGTH = 20;
+const SEND_TIMEOUT_MS = 15000;
+
+const sendNotes: Record<SendState, string> = {
+  idle: "",
+  sending: "Sending your brief…",
+  sent: "Sent. A short note is on its way.",
+  failed: "The send failed. Your brief is still here.",
+};
+
+const sendIntros: Record<SendState, string> = {
+  idle: "",
+  sending: "Sending it to Keanu now.",
+  sent: "Keanu has your brief. Keep a copy if you like.",
+  failed: "Keanu has not received it yet. Try again, or copy or download it to share another way.",
+};
+
+async function postEnquiry(enquiry: Enquiry): Promise<boolean> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), SEND_TIMEOUT_MS);
+  try {
+    const response = await fetch(ENQUIRY_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...enquiry,
+        page: window.location.href,
+        submittedAt: new Date().toISOString(),
+      }),
+      signal: controller.signal,
+    });
+    return response.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function BriefForm() {
   const [selected, setSelected] = useState<string[]>([]);
   const [brief, setBrief] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
+  const [sendState, setSendState] = useState<SendState>("idle");
+  const enquiry = useRef<Enquiry | null>(null);
   const result = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   useEffect(() => {
     if (brief) result.current?.focus();
   }, [brief]);
+  async function send(next: Enquiry) {
+    setSendState("sending");
+    setSendState((await postEnquiry(next)) ? "sent" : "failed");
+  }
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const field = (key: string) => String(data.get(key) ?? "").trim();
+    const next: Enquiry = {
+      name: field("name"),
+      email: field("email"),
+      business: field("business"),
+      tools: tools.filter((tool) => selected.includes(tool)),
+      problem: field("brief"),
+    };
+    const emailInput = form.elements.namedItem("email") as HTMLInputElement;
+    const briefInput = form.elements.namedItem("brief") as HTMLTextAreaElement;
+    emailInput.setCustomValidity(
+      EMAIL_PATTERN.test(next.email) ? "" : "Enter a full email address, like alex@company.com.",
+    );
+    briefInput.setCustomValidity(
+      next.problem.length >= MIN_PROBLEM_LENGTH
+        ? ""
+        : `Add a little more detail. Minimum ${MIN_PROBLEM_LENGTH} characters.`,
+    );
+    if (!form.reportValidity()) return;
     setBrief(
-      `Workflow enquiry\n\nName: ${String(data.get("name")).trim()}\nReply to: ${String(data.get("email")).trim()}\nBusiness: ${String(data.get("business")).trim() || "Not specified"}\nTools: ${selected.join(", ") || "To discuss"}\n\n${String(data.get("brief")).trim()}`,
+      `Workflow enquiry\n\nName: ${next.name}\nReply to: ${next.email}\nBusiness: ${next.business || "Not specified"}\nTools: ${next.tools.join(", ") || "To discuss"}\n\n${next.problem}`,
     );
     setCopied(false);
     setCopyError(false);
+    enquiry.current = next;
+    void send(next);
   }
   async function copy() {
     try {
@@ -598,6 +677,7 @@ function BriefForm() {
               required
               maxLength={254}
               placeholder="alex@company.com"
+              onInput={(e) => e.currentTarget.setCustomValidity("")}
             />
           </label>
         </div>
@@ -643,6 +723,7 @@ function BriefForm() {
             rows={4}
             placeholder="For example: Enquiries arrive in three places. I want to capture them in one sheet and follow up without chasing each one manually."
             aria-describedby="brief-help"
+            onInput={(e) => e.currentTarget.setCustomValidity("")}
           />
         </label>
         <p id="brief-help" className="field-help">
@@ -652,9 +733,7 @@ function BriefForm() {
           Prepare my brief <ArrowRight size={18} />
         </button>
         <p className="form-disclosure">
-          {CONTACT_EMAIL
-            ? "Review your brief, then send it through your email app."
-            : "Prepare a brief you can copy or download. This form does not send it."}
+          Sends your brief to Keanu. You can copy or download it too.
         </p>
       </form>
       {brief !== null && (
@@ -664,13 +743,17 @@ function BriefForm() {
           </span>
           <p className="eyebrow">READY TO SHARE</p>
           <h3>Your brief is ready.</h3>
-          <p>
-            {CONTACT_EMAIL
-              ? "Review the details below, then open your email app to send it to Keanu."
-              : "Copy or download your brief to share with Keanu. Nothing has been sent."}
-          </p>
+          <p>{sendIntros[sendState]}</p>
           <pre>{brief}</pre>
           <div className="brief-actions">
+            {sendState === "failed" && (
+              <button
+                className="button primary"
+                onClick={() => enquiry.current && void send(enquiry.current)}
+              >
+                <RotateCcw size={16} /> Try sending again
+              </button>
+            )}
             {CONTACT_EMAIL && (
               <a
                 className="button primary"
@@ -689,21 +772,23 @@ function BriefForm() {
             </button>
           </div>
           <p className="field-help" role="status">
-            {copied
-              ? "Brief copied to clipboard."
-              : copyError
-                ? "Copy is unavailable. Download the brief instead."
-                : "Your details stay in this page until you choose to share them."}
+            {copyError ? "Copy is unavailable. Download the brief instead." : sendNotes[sendState]}
           </p>
-          <button
-            className="text-link edit-brief"
-            onClick={() => {
-              setBrief(null);
-              requestAnimationFrame(() => formRef.current?.querySelector("input")?.focus());
-            }}
-          >
-            Edit my details <ChevronRight size={16} />
-          </button>
+          <span className="sr-only" aria-live="polite">
+            {copied ? "Brief copied to clipboard." : ""}
+          </span>
+          {(sendState === "idle" || sendState === "failed") && (
+            <button
+              className="text-link edit-brief"
+              onClick={() => {
+                setBrief(null);
+                setSendState("idle");
+                requestAnimationFrame(() => formRef.current?.querySelector("input")?.focus());
+              }}
+            >
+              Edit my details <ChevronRight size={16} />
+            </button>
+          )}
         </div>
       )}
     </div>
