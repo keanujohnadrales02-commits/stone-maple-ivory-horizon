@@ -250,7 +250,7 @@ export function Portfolio() {
                         <i />
                       </span>
                       <span>
-                        {p.kicker} / {p.lead ? "Practice case study" : "Workflow canvas"}
+                        {p.kicker} / {p.lead ? "CRM & operations" : "Workflow canvas"}
                       </span>
                       <Expand size={13} />
                     </div>
@@ -266,7 +266,7 @@ export function Portfolio() {
                     </div>
                     {p.lead && (
                       <span className="preview-caption">
-                        <span className="status-dot" /> PRACTICE ENVIRONMENT
+                        <span className="status-dot" /> CONTACTS · PIPELINES · SCHEDULING
                       </span>
                     )}
                   </div>
@@ -290,7 +290,7 @@ export function Portfolio() {
                           ))}
                         </div>
                         <p className="practice-note">
-                          Self-directed DEMO. CRM and form checks documented; automation remains draft and untested.
+                          Explore the setup, supporting screenshots, and documented checks.
                         </p>
                       </>
                     )}

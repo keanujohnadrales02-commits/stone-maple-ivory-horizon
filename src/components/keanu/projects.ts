@@ -35,9 +35,9 @@ export const PROJECTS: Project[] = [
     graph: "ghl",
     lead: true,
     facts: [
-      { value: "7", label: "tour pipeline stages" },
-      { value: "1", label: "sample tour booking" },
-      { value: "Draft", label: "untested workflow" },
+      { value: "CRM", label: "contacts & pipelines" },
+      { value: "Tasks", label: "follow-ups & notes" },
+      { value: "Calendar", label: "appointments & time zones" },
     ],
     caveat: "Self-directed project with fictional contacts for DEMO Home Tours. CRM and funnel work documented in the October 4–5, 2026 practice checklist, with original setup screenshots. A controlled form submission was checked; the workflow was not run. No paid client work or live results are claimed. The registration workflow remained Draft, with 0 enrolled and no verified end-to-end automation.",
     lanes: [
