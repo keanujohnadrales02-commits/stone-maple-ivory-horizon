@@ -1854,3 +1854,21 @@ h2 span {
     display: none;
   }
 }
+
+/* Checklist-led case study; no simulated product screenshot. */
+.preview-ghl .preview-image { background: #211829; height: auto; min-height: 250px; }
+.practice-overview { width: 100%; padding: 28px; display: grid; gap: 18px; color: #eee5f8; text-align: left; }
+.practice-overview strong { font-size: clamp(23px, 2.5vw, 34px); line-height: 1.2; }
+.practice-overview > span:not(.eyebrow) { font-size: 15px; line-height: 1.6; }
+.practice-overview small { font-size: 13px; line-height: 1.6; color: #d0bedf; }
+.practice-evidence-note { max-width: 480px; padding: 28px; color: #d8cbe3; }
+.practice-evidence-note h3 { font-size: 26px; color: #f4edfa; margin: 18px 0; }
+.practice-evidence-note p { font-size: 16px; line-height: 1.7; margin-top: 16px; }
+.project-facts span, .practice-note, .case-caveat, .dialog-footer > span { font-size: 13px; line-height: 1.6; color: #d2c3de; }
+.project-meta, .preview-toolbar, .preview-caption { font-size: 12px; line-height: 1.5; }
+.preview-toolbar { height: auto; min-height: 24px; }
+.project-meta { flex-wrap: wrap; gap: 10px; }
+@media (max-width: 600px) { .practice-overview, .practice-evidence-note { padding: 20px; } .dialog-footer { flex-wrap: wrap; gap: 14px; } }
+
+.case-visual { flex-direction: column; gap: 16px; }
+.evidence-caption { margin: 0; font-size: 14px; line-height: 1.65; color: #d8cbe3; width: 100%; }
