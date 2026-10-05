@@ -25,7 +25,7 @@ import { CONTACT_EMAIL, ENQUIRY_WEBHOOK_URL } from "./contact-config";
 
 const tools = ["GoHighLevel", "n8n", "Make.com", "Zapier", "Google Sheets", "Other"];
 const outcomes = [
-  "Keep every candidate and next step in one place.",
+  "Daily CRM support: contacts, follow-ups, appointments, and clear client updates.",
   "Connect patient conversations with appointment admin.",
   "Keep enquiries moving on the channel they came from.",
   "Give priority leads their own follow-up path.",
@@ -250,12 +250,19 @@ export function Portfolio() {
                         <i />
                       </span>
                       <span>
-                        {p.kicker} / {p.lead ? "Pipeline overview" : "Workflow canvas"}
+                        {p.kicker} / {p.lead ? "Practice case study" : "Workflow canvas"}
                       </span>
                       <Expand size={13} />
                     </div>
                     <div className="preview-image">
-                      <img src={p.shot} alt={`${p.short} setup preview`} loading="lazy" />
+                      {p.shot ? <img src={p.shot} alt={`${p.short} setup preview`} loading="lazy" /> : (
+                        <div className="practice-overview">
+                          <span className="eyebrow">DEMO HOME TOURS</span>
+                          <strong>Daily operations.<br />Documented practice.</strong>
+                          <span>Contacts → Follow-ups → Appointments</span>
+                          <small>Checklist summary · screenshots pending review</small>
+                        </div>
+                      )}
                     </div>
                     {p.lead && (
                       <span className="preview-caption">
@@ -268,7 +275,7 @@ export function Portfolio() {
                       <span>
                         <Icon size={15} /> {p.kicker}
                       </span>
-                      <span>{p.lead ? "FEATURED / PRACTICE BUILD" : `0${i + 1}`}</span>
+                      <span>{p.lead ? "SELF-DIRECTED PROJECT" : `0${i + 1}`}</span>
                     </div>
                     <h3>
                       {p.short}
@@ -278,21 +285,12 @@ export function Portfolio() {
                     {p.lead && (
                       <>
                         <div className="project-facts">
-                          <div>
-                            <strong>5</strong>
-                            <span>pipeline stages</span>
-                          </div>
-                          <div>
-                            <strong>20</strong>
-                            <span>practice bookings</span>
-                          </div>
-                          <div>
-                            <strong>Draft</strong>
-                            <span>workflow status</span>
-                          </div>
+                          {p.facts?.map((fact) => (
+                            <div key={fact.label}><strong>{fact.value}</strong><span>{fact.label}</span></div>
+                          ))}
                         </div>
                         <p className="practice-note">
-                          Fictional contacts. No live customer messages.
+                          Self-directed DEMO. CRM and form checks documented; automation remains draft and untested.
                         </p>
                       </>
                     )}
@@ -469,14 +467,14 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
           </div>
           <div className="case-navigation" aria-label="Project views">
             {project.lanes.map((l, i) => (
-              <button key={l.src} aria-pressed={i === laneIndex} onClick={() => setLaneIndex(i)}>
+              <button key={l.label} aria-pressed={i === laneIndex} onClick={() => setLaneIndex(i)}>
                 {l.label}
               </button>
             ))}
           </div>
           <div className="case-content">
             <div className="case-visual">
-              <a
+              {lane.src ? <a
                 href={lane.src}
                 target="_blank"
                 rel="noreferrer"
@@ -486,7 +484,16 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
                 <span className="enlarge-label">
                   <Expand size={15} /> Open full-size image
                 </span>
-              </a>
+              </a> : (
+                <div className="practice-evidence-note">
+                  <Workflow size={36} aria-hidden="true" />
+                  <p className="eyebrow">SELF-DIRECTED PROJECT</p>
+                  <h3>Home Tours practice</h3>
+                  <p>This view summarizes the completed practice checklist. The linked screenshots have not yet been reviewed for this portfolio.</p>
+                  <p>No recreated interface or unrelated screenshot is presented as evidence.</p>
+                </div>
+              )}
+              {lane.caption && <p className="evidence-caption">{lane.caption}</p>}
             </div>
             <div className="case-description" aria-live="polite">
               <p className="eyebrow">
@@ -511,7 +518,7 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
             </div>
           </div>
           <div className="dialog-footer">
-            <span>Actual setup screenshots</span>
+            <span>{lane.src ? "Actual setup screenshot" : "Source: GHL Home Tours Practice checklist · October 4, 2026"}</span>
             <button
               className="text-link"
               onClick={() => {

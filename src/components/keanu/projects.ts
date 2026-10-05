@@ -1,7 +1,8 @@
 type Lane = {
-  src: string;
+  src?: string;
   label: string;
   summary: string;
+  caption?: string;
   steps: string[];
 };
 
@@ -12,7 +13,7 @@ export type Project = {
   short: string;
   body: string;
   tags: string[];
-  shot: string;
+  shot?: string;
   lanes: Lane[];
   graph: "ghl" | "front" | "social" | "zapier";
   dark: boolean;
@@ -23,104 +24,93 @@ export type Project = {
 
 export const PROJECTS: Project[] = [
   {
-    id: "ghl-recruitment",
+    id: "ghl-appointment-management",
     kicker: "GoHighLevel",
-    title: "Recruitment CRM",
-    short: "Recruitment CRM",
-    body: "Practice account. A pipeline, a UK interview calendar, and a follow-up workflow left in draft.",
-    tags: ["GoHighLevel", "Pipeline", "Calendar", "Workflow"],
-    shot: "/projects/ghl-pipeline.png",
-    dark: false,
+    title: "GoHighLevel CRM & Appointment Management",
+    short: "CRM & Appointment Management",
+    shot: "/projects/home-tours-pipeline.jpg",
+    body: "Self-directed Home Tours practice: organize contacts, track registrations, manage follow-ups, and schedule appointments.",
+    tags: ["CRM administration", "Follow-up tasks", "Scheduling", "Client updates"],
+    dark: true,
     graph: "ghl",
     lead: true,
     facts: [
-      { value: "5 stages", label: "New lead to won" },
-      { value: "20 interviews", label: "Practice bookings" },
-      { value: "30 min", label: "UK office hours" },
-      { value: "Draft", label: "Workflow not published" },
+      { value: "7", label: "tour pipeline stages" },
+      { value: "1", label: "sample tour booking" },
+      { value: "Draft", label: "untested workflow" },
     ],
-    caveat:
-      "Practice only. The people are fictional. The workflow has enrolled nobody, and customer email and SMS are off.",
+    caveat: "Self-directed project with fictional contacts for DEMO Home Tours. CRM and funnel work documented in the October 4–5, 2026 practice checklist, with original setup screenshots. A controlled form submission was checked; the workflow was not run. No paid client work or live results are claimed. The registration workflow remained Draft, with 0 enrolled and no verified end-to-end automation.",
     lanes: [
       {
-        src: "/projects/ghl-pipeline.png",
-        label: "Pipeline",
-        summary:
-          "One board, five stages. Five fictional candidates. Each contacted card already has an interview time.",
+        label: "CRM & pipelines",
+        src: "/projects/home-tours-pipeline.jpg",
+        caption: "Home Tours - Buyers: Alex Test in Registered and Jane Test in Confirmed. Six columns are visible; Closed is documented in the checklist.",
+        summary: "Organized a Home Tours practice account using contact fields, tags, notes, and opportunity cards.",
         steps: [
-          "Stages: New lead, Contacted, Booked, Showed, Won",
-          "Alex is still a new lead",
-          "Morgan, Taylor, Sam, and Jane sit in Contacted",
-          "Booked, Showed, and Won are empty on purpose",
+          "Created Home Tours - Buyers: Registered, Confirmed, Attended, No-show, Consult Booked, Under Contract, Closed.",
+          "Added Tour Date, Party Size, and Tour Attendance fields plus the home-tour-registered tag.",
+          "Updated Jane Test to Confirmed; Alex Test remained in Registered with attendance not confirmed.",
+          "Created a separate Recruiting pipeline and recorded Sam Test in Applied. These are fictional practice records.",
         ],
       },
       {
-        src: "/projects/ghl-contact.png",
-        label: "Contact",
-        summary:
-          "Jane Test is not a real person. The tag and custom field come from an earlier cleaning-service practice. The note is about the interview.",
+        label: "Tasks & notes",
+        src: "/projects/home-tours-tasks.jpg",
+        caption: "Jane’s Home Tours follow-up is complete; the headcount reminder is listed. Other rows belong to earlier practice, including cleaning-service tasks.",
+        summary: "Practised daily VA administration: follow-up tasks, due dates, contact links, attendance notes, and client handoffs.",
         steps: [
-          "Tag: new-lead",
-          "Custom field: Service Interested In",
-          "Note: she asked about the interview format",
-          "Email and phone are fake",
+          "Created Jane’s attendance follow-up, linked it to her contact, and marked it complete after recording the practice update.",
+          "Recorded Jane’s party size as 2 and Alex’s as 3; only Jane was confirmed.",
+          "Created a headcount reminder due October 7 at 9:00 AM Austin time.",
+          "Documented Done / Blocked / Tomorrow / Questions, including a question about tracking guests separately from bookings.",
         ],
       },
       {
-        src: "/projects/ghl-tasks.png",
-        label: "Tasks",
-        summary:
-          "Follow-ups are tied to a person and a due date. Rows marked Example are HighLevel’s own samples, not mine.",
-        steps: [
-          "Overdue tasks are marked in red",
-          "Morgan’s discount request is an escalation, not a normal follow-up",
-          "Cleaning tasks are from the earlier practice",
-          "Example rows were already in the account",
-        ],
-      },
-      {
-        src: "/projects/ghl-calendar.png",
         label: "Calendar",
-        summary:
-          "Twenty practice interviews in one week. Thirty minutes each. The clock on this screen is Manila. The slots still fall inside UK office hours.",
+        src: "/projects/home-tours-calendar.png",
+        caption: "Saturday shows one class booking out of 20 capacity, at 10 PM Taipei time (9 AM Austin). The weekday blocks are separate recruitment practice bookings.",
+        summary: "Configured a separate Saturday Home Bus Tour practice calendar and checked the Austin-to-Taipei time conversion.",
         steps: [
-          "Tuesday and Wednesday only",
-          "Names are all Test",
-          "No real candidates were contacted",
+          "Class Booking: 240-minute duration and interval, 20-seat capacity, Saturday 9:00 AM–1:00 PM America/Chicago.",
+          "Created one sample booking for Jane Test on October 10. GHL displayed 1/20 bookings; Party Size recorded Jane plus one guest.",
+          "The 20 seats are capacity, not 20 bookings. Alex’s registration was not a confirmed booking.",
+          "Checked notification settings before booking; the checklist records no customer email or SMS sent. Corrected the blocked demo call’s time zone.",
         ],
       },
       {
-        src: "/projects/ghl-hours.png",
-        label: "Hours",
-        summary: "The calendar is set for a UK interviewer, not for my timezone.",
+        label: "Registration funnel",
+        src: "/projects/home-tours-registration.jpg",
+        caption: "Register page from the three-step DEMO funnel. The architecture photo is the retained template image, not a real team or client.",
+        summary: "Adapted a template into Tour Info → Register → Thank You, kept in preview. Registration is a request, not a confirmed seat.",
         steps: [
-          "30-minute meeting, 30-minute interval",
-          "Europe/London",
-          "Monday to Friday, 9:00 to 17:00",
-          "Saturday and Sunday are off",
+          "Embedded the Styled registration form with five required fields: first name, last name, email, tour date, and seats needed.",
+          "Mapped Tour Date and Party Size to contact fields.",
+          "The checklist records desktop/mobile checks and one controlled submission using the existing Casey Test contact.",
+          "The form reached Thank You, updated the existing record, and left the count at 20 contacts. No messages were sent; no domain was connected.",
         ],
       },
       {
-        src: "/projects/ghl-alerts.png",
-        label: "Alerts",
-        summary:
-          "Customers were not emailed or texted. Only in-app alerts are on, and only when an appointment is booked.",
+        label: "Draft workflow",
+        src: "/projects/home-tours-draft-workflow.jpg",
+        caption: "Home Tours - Funnel Registration (draft): filtered form trigger, tag, opportunity action, and internal notification. This is configuration evidence, not an execution log.",
+        summary: "Configured a form-specific registration workflow. It remained Draft, with 0 enrolled and no workflow test.",
         steps: [
-          "Email, SMS, and WhatsApp are off",
-          "Cancellation, reschedule, reminder, and follow-up are off",
-          "This was deliberate, so the practice bookings stayed quiet",
+          "Trigger: submission of Home Tours Registration - Styled (DEMO) only.",
+          "Add home-tour-registered, then create/update an opportunity in Home Tours - Buyers > Registered.",
+          "Configure an in-app notification to Keanu; no customer message action in this draft.",
+          "Documented overlapping registration triggers. They require consolidation and testing before any future activation.",
         ],
       },
       {
-        src: "/projects/ghl-workflow.png",
-        label: "Workflow",
-        summary: "The path is drawn. It is still a draft, so it has not run.",
+        label: "Completed checks",
+        src: "/projects/home-tours-validation.jpg",
+        caption: "An empty submission shows all five required-field errors and remains on the form. Screenshot from the recorded preview test.",
+        summary: "The checklist documents the 20-step coached practice and F0–F9 funnel checks. Form testing and workflow execution are separate.",
         steps: [
-          "Form submitted",
-          "Add the new-lead tag",
-          "Create an opportunity in New lead",
-          "Send a test email",
-          "Status is Draft. Enrolled: 0",
+          "Checked saved field values after reload and removed an accidental duplicate to return to 20 contacts.",
+          "Checked pipeline stages, task completion, notification settings, and the calendar time zone.",
+          "Practised SMS-only DND on a fictional opt-out record; no real STOP message is claimed.",
+          "The proposed five-workflow expansion, future SOPs, and dashboards are not presented as completed or tested work.",
         ],
       },
     ],
