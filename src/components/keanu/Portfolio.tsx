@@ -19,18 +19,49 @@ import {
   Pause,
   Play,
   RotateCcw,
+  CalendarCheck,
+  BellRing,
+  Inbox,
+  ShieldCheck,
 } from "lucide-react";
 import { PROJECTS, type Project } from "./projects";
 import { CONTACT_EMAIL, ENQUIRY_WEBHOOK_URL } from "./contact-config";
 
 const tools = ["GoHighLevel", "n8n", "Make.com", "Zapier", "Google Sheets", "Other"];
 const outcomes = [
-  "Daily CRM support: contacts, follow-ups, appointments, and clear client updates.",
-  "Connect patient conversations with appointment admin.",
-  "Keep enquiries moving on the channel they came from.",
-  "Give priority leads their own follow-up path.",
+  "A patient messages the website chat, and one AI agent handles the appointment from there.",
+  "A full appointment pipeline in GoHighLevel, built in a practice account with fictional records.",
+  "Every enquiry is logged, then answered on the channel it came from.",
+  "Referrals get a faster, more personal path. Everyone else goes straight to sales.",
 ];
-const icons = [Workflow, CalendarDays, MessageSquare, RouteIcon];
+const icons = [CalendarDays, Workflow, MessageSquare, RouteIcon];
+const jobs = [
+  {
+    icon: MessageSquare,
+    title: "Answers enquiries",
+    body: "Website chat gets a reply in seconds, at any hour, based on your services, hours and rules.",
+  },
+  {
+    icon: CalendarCheck,
+    title: "Books into GoHighLevel",
+    body: "It checks availability, then books, moves or cancels the appointment on the right contact and calendar.",
+  },
+  {
+    icon: BellRing,
+    title: "Confirms and reminds",
+    body: "A confirmation goes out when they book, a reminder before the visit, and a recall when they’re due back.",
+  },
+  {
+    icon: Inbox,
+    title: "Captures every lead",
+    body: "Even when nobody books, the enquiry becomes a clean record and your staff get a notification.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Catches its own errors",
+    body: "Failed steps are logged, retried when that’s safe, and sent to you if they matter.",
+  },
+];
 
 export function Portfolio() {
   const [marqueePaused, setMarqueePaused] = useState(false);
@@ -74,6 +105,9 @@ export function Portfolio() {
             </span>
           </a>
           <nav aria-label="Main navigation" className="desktop-nav">
+            <a href="#build" aria-current={active === "build" ? "location" : undefined}>
+              What I build
+            </a>
             <a href="#work" aria-current={active === "work" ? "location" : undefined}>
               Selected work
             </a>
@@ -98,6 +132,7 @@ export function Portfolio() {
         {menu && (
           <nav id="mobile-menu" className="mobile-menu container" aria-label="Mobile navigation">
             {[
+              ["What I build", "build"],
               ["Selected work", "work"],
               ["How it works", "how"],
               ["Start a project", "contact"],
@@ -114,47 +149,52 @@ export function Portfolio() {
         <section id="home" className="hero-section container">
           <div className="hero-copy">
             <p className="eyebrow">
-              <span className="status-dot" /> INDEPENDENT AUTOMATION SPECIALIST
+              <span className="status-dot" /> AI FRONT DESK FOR APPOINTMENT-BASED BUSINESSES
             </p>
             <h1>
-              Less busywork.
+              Every enquiry
               <br />
-              More <span>follow-through.</span>
+              answered.
+              <br />
+              Every booking
+              <br />
+              <span>in the calendar.</span>
             </h1>
             <p className="hero-description">
-              I connect your tools so enquiries become next steps. From the first message to the
-              follow-up, build a workflow that keeps things moving.
+              I build an AI front desk that replies to new enquiries, books the appointment into
+              GoHighLevel and sends the confirmation, without anyone on your team touching it.
             </p>
             <div className="hero-actions">
               <a href="#work" className="button primary">
-                Explore my work <ArrowDown size={18} />
+                See how it works <ArrowDown size={18} />
               </a>
               <a href="#contact" className="text-link">
-                Let’s map your workflow <ArrowUpRight size={18} />
+                Send me your setup <ArrowUpRight size={18} />
               </a>
             </div>
             <div className="hero-note">
-              <span className="note-line" /> Built around your process. Connected to your tools.
+              <span className="note-line" /> It runs on self-hosted n8n with built-in error
+              handling. When a step fails, it gets caught and flagged, so a lead isn’t left waiting.
             </div>
           </div>
           <div
             className="hero-art"
-            aria-label="Illustration of an enquiry becoming an organised follow-up"
+            aria-label="Illustration of an enquiry becoming a booked appointment"
           >
             <img className="portal-art" src="/keanu-portal.jpg" alt="" fetchPriority="high" />
             <div className="art-top">
               <span className="mini-mark">K / SYSTEMS</span>
-              <span>01 — CONNECTED</span>
+              <span>01 — FRONT DESK</span>
             </div>
             <div className="workflow-illustration">
-              <div className="flow-label">FROM INBOX TO NEXT STEP</div>
+              <div className="flow-label">FROM ENQUIRY TO BOOKED VISIT</div>
               <div className="flow-node">
                 <span className="node-icon">
                   <MessageSquare size={18} />
                 </span>
                 <div>
                   <strong>A new enquiry</strong>
-                  <small>Your website, chat, or inbox</small>
+                  <small>Website chat, any hour</small>
                 </div>
                 <span className="node-dot" />
               </div>
@@ -166,8 +206,8 @@ export function Portfolio() {
                   <Workflow size={19} />
                 </span>
                 <div>
-                  <strong>Everything, connected.</strong>
-                  <small>Capture · route · follow up</small>
+                  <strong>AI front desk</strong>
+                  <small>Answer · check times · book</small>
                 </div>
                 <Check size={17} />
               </div>
@@ -179,13 +219,13 @@ export function Portfolio() {
                   <CheckCheck size={20} />
                 </span>
                 <div>
-                  <strong>The next step, handled</strong>
-                  <small>Clear records. Fewer loose ends.</small>
+                  <strong>Booked in GoHighLevel</strong>
+                  <small>Confirmed, logged, reminded.</small>
                 </div>
               </div>
             </div>
             <div className="art-bottom">
-              <span className="status-dot" /> A LITTLE LESS MANUAL. A LOT MORE CONNECTED.
+              <span className="status-dot" /> ANSWERED IN SECONDS. BOOKED WITHOUT CHASING.
             </div>
           </div>
         </section>
@@ -198,7 +238,7 @@ export function Portfolio() {
             >
               {[0, 1].map((copy) => (
                 <div className="tools-group" key={copy} aria-hidden={copy === 1 ? true : undefined}>
-                  {["GoHighLevel", "n8n", "Make", "Zapier", "Google Sheets"].map((tool) => (
+                  {["GoHighLevel", "n8n", "Make", "Zapier", "Google Sheets", "Slack"].map((tool) => (
                     <span key={tool}>
                       {tool === "n8n" && <Workflow size={20} />}
                       {tool}
@@ -217,19 +257,97 @@ export function Portfolio() {
             {marqueePaused ? <Play size={14} /> : <Pause size={14} />}
           </button>
         </div>
-        <section id="work" className="work-section container section-space">
+        <section id="build" className="container section-space">
+          <p className="positioning">
+            Most lost appointments start with a slow reply. Someone asks a question at 9pm, nobody
+            answers until morning, and by then they’ve booked somewhere else.{" "}
+            <span>
+              I build one system that closes that gap. It answers, books, confirms, reminds and logs
+              everything, and it tells you when something breaks. I build that one system properly
+              every time, not a different project for every client.
+            </span>
+          </p>
           <div className="section-heading">
             <div>
-              <p className="eyebrow">01 / SELECTED WORK</p>
+              <p className="eyebrow">01 / WHAT I BUILD</p>
               <h2>
-                Real workflows.
+                One system.
                 <br />
-                <span>A closer look.</span>
+                <span>Five jobs it does every day.</span>
               </h2>
             </div>
             <p>
-              A look inside the systems I’ve built, with the actual setup, connected tools, and
-              decisions behind each workflow.
+              The AI Front Desk sits between your website and your calendar. It handles the routine
+              part of booking so your team only steps in when a person is needed.
+            </p>
+          </div>
+          <div className="build-grid">
+            {jobs.map((job, i) => (
+              <article className={`build-card ${i === 0 ? "build-lead" : ""}`} key={job.title}>
+                <div className="build-card-head">
+                  <span className="node-icon">
+                    <job.icon size={18} />
+                  </span>
+                  <span className="build-num">0{i + 1}</span>
+                </div>
+                <h3>{job.title}</h3>
+                <p>{job.body}</p>
+                {i === 0 && (
+                  <div className="chat-demo" aria-hidden="true">
+                    <span className="chat-label">EXAMPLE CONVERSATION</span>
+                    <p className="bubble in">Hi, can I book a cleaning this week?</p>
+                    <p className="bubble out">I have Thursday at 10:30 or 2:15. Which works for you?</p>
+                    <p className="bubble in">2:15, please.</p>
+                    <div className="flow-node flow-done chat-booked">
+                      <span className="node-icon">
+                        <CheckCheck size={18} />
+                      </span>
+                      <div>
+                        <strong>Booked · Thursday 2:15</strong>
+                        <small>Added to GoHighLevel · confirmation sent</small>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+          <div className="fit-bar">
+            <div>
+              <p className="eyebrow">BUILT FOR</p>
+              <p>
+                Clinics, dental practices and other businesses whose revenue depends on booked
+                appointments.
+              </p>
+            </div>
+            <div>
+              <p className="eyebrow">YOU DON’T NEED</p>
+              <ul>
+                {["A new CRM", "A long discovery process", "Someone watching it all day"].map(
+                  (item) => (
+                    <li key={item}>
+                      <X size={13} aria-hidden="true" />
+                      {item}
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>
+          </div>
+        </section>
+        <section id="work" className="work-section container section-space">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">02 / SELECTED WORK</p>
+              <h2>
+                Systems I’ve built.
+                <br />
+                <span>Shown as they are.</span>
+              </h2>
+            </div>
+            <p>
+              Actual setups and actual screenshots, showing what each one does, which tools it uses
+              and what has been tested.
             </p>
           </div>
           <div className="project-grid">
@@ -250,7 +368,7 @@ export function Portfolio() {
                         <i />
                       </span>
                       <span>
-                        {p.kicker} / {p.lead ? "CRM & operations" : "Workflow canvas"}
+                        {p.kicker} / {p.graph === "ghl" ? "CRM & operations" : "Workflow canvas"}
                       </span>
                       <Expand size={13} />
                     </div>
@@ -266,7 +384,7 @@ export function Portfolio() {
                     </div>
                     {p.lead && (
                       <span className="preview-caption">
-                        <span className="status-dot" /> CONTACTS · PIPELINES · SCHEDULING
+                        <span className="status-dot" /> CHAT · BOOKING · REMINDERS · ERRORS
                       </span>
                     )}
                   </div>
@@ -275,7 +393,7 @@ export function Portfolio() {
                       <span>
                         <Icon size={15} /> {p.kicker}
                       </span>
-                      <span>{p.lead ? "SELF-DIRECTED PROJECT" : `0${i + 1}`}</span>
+                      <span>{p.lead ? "FEATURED SYSTEM" : `0${i + 1}`}</span>
                     </div>
                     <h3>
                       {p.short}
@@ -290,12 +408,16 @@ export function Portfolio() {
                           ))}
                         </div>
                         <p className="practice-note">
-                          Explore the setup, supporting screenshots, and documented checks.
+                          Open the booking, reminders, leads and error workflows.
                         </p>
                       </>
                     )}
                     <span className="project-link">
-                      {p.lead ? "Explore the CRM setup" : "Explore the workflow"}
+                      {p.lead
+                        ? "Explore the front desk"
+                        : p.graph === "ghl"
+                          ? "Explore the CRM setup"
+                          : "Explore the workflow"}
                       <ArrowRight size={16} />
                     </span>
                   </div>
@@ -308,84 +430,106 @@ export function Portfolio() {
           <div className="container">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">02 / THE APPROACH</p>
+                <p className="eyebrow">03 / HOW I WORK</p>
                 <h2>
-                  Good systems start
+                  Built once. Built properly.
                   <br />
-                  with a clear <span>next step.</span>
+                  Then it <span>runs.</span>
                 </h2>
               </div>
               <p>
-                Start with the way your business actually works. Then connect the right tools, with
-                a clear path for the unexpected.
+                Most of the work happens before anything goes live. You fill in a short brief, I
+                handle the build, and you only hear from me when a decision needs you.
               </p>
             </div>
-            <div className="process-grid">
+            <ol className="steps">
               {[
                 {
-                  title: "Map the process",
-                  body: "Where do enquiries arrive? Who needs to act? We map the handoffs and decide what should happen next.",
-                  detail: "A workflow map before the build",
+                  owner: "Your part",
+                  title: "Brief",
+                  body: "You tell me how bookings work today: services, hours, calendar rules, and anything that should never be automated. A written brief replaces most of the calls.",
+                  detail: "A written brief, not a string of calls",
                 },
                 {
-                  title: "Connect the pieces",
-                  body: "Capture the details, route them to the right place, and follow up through the tools you already use.",
-                  detail: "Your tools, working together",
+                  owner: "My part",
+                  title: "Build",
+                  body: "I set up the front desk on your account: the chat, the booking logic, confirmations, reminders and logging.",
+                  detail: "Set up on your own account",
                 },
                 {
-                  title: "Check the edges",
-                  body: "Test replies, missing details, and failed steps. Make it clear when automation should stop and a person should take over.",
-                  detail: "Clear checks and handoffs",
+                  owner: "My part",
+                  title: "Break it on purpose",
+                  body: "Before launch I test the awkward cases: double bookings, missing details, reschedules, off-topic messages and failed steps. Anything the system shouldn’t decide goes to a person.",
+                  detail: "Edge cases tested before launch",
                 },
-              ].map((step, i) => (
-                <article className="process-step" key={step.title}>
-                  <div className="process-number">
-                    <span>0{i + 1}</span>
-                    {i < 2 && <ArrowRight size={20} />}
-                  </div>
-                  <h3>{step.title}</h3>
-                  <p>{step.body}</p>
-                  <div className="process-detail">
-                    <Check size={15} />
-                    {step.detail}
-                  </div>
-                </article>
+                {
+                  owner: "Live",
+                  title: "Run",
+                  body: "It goes live with error alerts and a booking log, so you can see exactly what it did.",
+                  detail: "Error alerts and a booking log",
+                },
+              ].map((step, i, steps) => (
+                <li className="step" key={step.title}>
+                  <span className="step-marker">0{i + 1}</span>
+                  {i < steps.length - 1 && (
+                    <span className="step-wire" aria-hidden="true">
+                      <i />
+                    </span>
+                  )}
+                  <article className="step-card">
+                    <span className={`step-owner owner-${step.owner.split(" ")[0].toLowerCase()}`}>
+                      {step.owner}
+                    </span>
+                    <h3>{step.title}</h3>
+                    <p>{step.body}</p>
+                    <div className="step-detail">
+                      <Check size={15} />
+                      {step.detail}
+                    </div>
+                  </article>
+                </li>
               ))}
-            </div>
-            <div className="approach-note">
-              <span className="note-symbol">↳</span>
-              <p>
-                The goal is simple:{" "}
-                <strong>
-                  less chasing, fewer missed handoffs, and a clear record of what happened.
-                </strong>
-              </p>
+            </ol>
+            <div className="goal-bar">
+              <p className="eyebrow">THE GOAL</p>
+              <ul>
+                {[
+                  "Fewer missed enquiries",
+                  "A calendar that fills without anyone chasing",
+                  "A record of every conversation",
+                ].map((goal) => (
+                  <li key={goal}>
+                    <Check size={15} aria-hidden="true" />
+                    {goal}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </section>
         <section id="contact" className="contact-section container section-space">
           <div className="contact-copy">
-            <p className="eyebrow">03 / LET’S BUILD SOMETHING USEFUL</p>
+            <p className="eyebrow">04 / NEXT STEP</p>
             <h2>
-              What’s taking up
+              How many enquiries
               <br />
-              too much of
+              go unanswered
               <br />
-              <span>your time?</span>
+              <span>after hours?</span>
             </h2>
             <p>
-              Tell me what keeps getting done by hand. We’ll start there and map a better way
-              through it.
+              Send a short brief about how people book with you now. I’ll reply with whether the AI
+              Front Desk fits and what setup would involve.
             </p>
             <div className="contact-promise">
               <Workflow size={22} />
               <div>
-                <strong>A clear plan comes first.</strong>
-                <span>We’ll map the workflow before building it.</span>
+                <strong>You don’t need a call to start.</strong>
+                <span>The brief covers what a discovery call would.</span>
               </div>
             </div>
             <a href="#work" className="text-link">
-              See what a workflow can look like <ArrowUpRight size={17} />
+              See the AI Front Desk <ArrowUpRight size={17} />
             </a>
           </div>
           <BriefForm />
@@ -657,8 +801,8 @@ function BriefForm() {
     <div className="brief-panel">
       <form ref={formRef} onSubmit={submit} hidden={brief !== null}>
         <div className="form-heading">
-          <h3>Tell me about your workflow</h3>
-          <span>About 2 minutes</span>
+          <h3>Tell me how you take bookings</h3>
+          <span>Takes about 2 minutes</span>
         </div>
         <p className="form-intro">A few details are all we need to start.</p>
         <div className="form-row">
@@ -720,7 +864,7 @@ function BriefForm() {
           </div>
         </fieldset>
         <label htmlFor="brief-description">
-          What would you like to make easier? <span>*</span>
+          How do people book with you today? <span>*</span>
           <textarea
             id="brief-description"
             name="brief"
@@ -728,7 +872,7 @@ function BriefForm() {
             minLength={20}
             maxLength={5000}
             rows={4}
-            placeholder="For example: Enquiries arrive in three places. I want to capture them in one sheet and follow up without chasing each one manually."
+            placeholder="For example: Patients message us on the website and Facebook. We reply when we can and book them by hand in GoHighLevel."
             aria-describedby="brief-help"
             onInput={(e) => e.currentTarget.setCustomValidity("")}
           />
@@ -737,10 +881,10 @@ function BriefForm() {
           A sentence or two is perfect. Minimum 20 characters.
         </p>
         <button className="button primary form-submit" type="submit">
-          Prepare my brief <ArrowRight size={18} />
+          Send my brief <ArrowRight size={18} />
         </button>
         <p className="form-disclosure">
-          Sends your brief to Keanu. You can copy or download it too.
+          This goes straight to me. You can also copy or download it.
         </p>
       </form>
       {brief !== null && (
