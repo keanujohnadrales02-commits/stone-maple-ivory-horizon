@@ -825,7 +825,7 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
                 rel="noreferrer"
                 aria-label={`Open full-size ${lane.label} screenshot`}
               >
-                <img src={lane.src} alt={`${project.title}: ${lane.label}`} />
+                <img src={lane.src} width="1600" height="1000" alt={`${project.title}: ${lane.label}`} />
                 <span className="enlarge-label">
                   <Expand size={15} /> Open full-size image
                 </span>
@@ -833,6 +833,7 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
               {lane.caption && <p className="evidence-caption">{lane.caption}</p>}
             </div>
           </div>
+          {project.leadForm && <LeadForm />}
           <div className="case-bottom">
             <div className="case-steps" aria-live="polite">
               <h3>Inside the workflow: {lane.label}</h3>
@@ -934,6 +935,135 @@ async function postEnquiry(enquiry: Enquiry): Promise<boolean> {
   } finally {
     clearTimeout(timer);
   }
+}
+
+const LEAD_SOURCES = [
+  ["referral", "A referral"],
+  ["google", "Google search"],
+  ["facebook", "Facebook"],
+  ["other", "Other"],
+];
+const LEAD_START_STEPS = [
+  ["1. Lead Comes In", "Webhooks by Zapier"],
+  ["2. Split into paths", "Paths"],
+];
+const LEAD_HIGH_PRIORITY_STEPS = [
+  ["3. Path conditions", "Source is exactly “referral”"],
+  ["4. Save High Priority Leads", "Google Sheets"],
+  ["5. Create Email Draft for Client", "AI by Zapier"],
+  ["6. Send Email to Client", "Gmail"],
+];
+const LEAD_FALLBACK_STEPS = [
+  ["7. Path conditions", "Every other source"],
+  ["8. Send a Notification to Sales Team", "Gmail"],
+];
+
+function LeadForm() {
+  const [lead, setLead] = useState<Record<string, string> | null>(null);
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const field = (key: string) => String(data.get(key) ?? "").trim();
+    setLead({
+      Name: field("name"),
+      Email: field("email"),
+      Company: field("company"),
+      Domain: field("domain"),
+      Source: field("source"),
+    });
+  }
+  const highPriority = lead?.Source === "referral";
+  return (
+    <section className="lead-section" aria-labelledby="lead-form-title">
+      <div>
+        <h3 id="lead-form-title">The lead form</h3>
+        <p>
+          This is where a lead fills in their details. When they send the form, the details go to step
+          1 in Zapier, and the Zap picks the path.
+        </p>
+        <p>Choose “A referral” to see the high priority path. Choose anything else to see the other one.</p>
+        <p className="lead-note">Preview only. This form isn’t connected yet, so nothing is sent.</p>
+      </div>
+      <div className="brief-panel">
+        {lead ? (
+          <div className="lead-result" role="status">
+            <h3>What goes to Zapier</h3>
+            <dl>
+              {Object.entries(lead).map(([key, value]) => (
+                <div key={key}>
+                  <dt>{key}</dt>
+                  <dd>{value || "Left blank"}</dd>
+                </div>
+              ))}
+            </dl>
+            <ol className="lead-flow">
+              {[...LEAD_START_STEPS, ...(highPriority ? LEAD_HIGH_PRIORITY_STEPS : LEAD_FALLBACK_STEPS)].map(
+                ([step, app]) => (
+                  <li key={step}>
+                    <Check size={15} aria-hidden="true" />
+                    <span>
+                      <strong>{step}</strong>
+                      <small>{app}</small>
+                    </span>
+                  </li>
+                ),
+              )}
+            </ol>
+            <p className="lead-path">
+              Path: <strong>{highPriority ? "High Priority" : "Fallback"}</strong>
+            </p>
+            <button type="button" className="button secondary" onClick={() => setLead(null)}>
+              Try another lead
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={submit}>
+            <div className="form-heading">
+              <h3>Request a quote</h3>
+              <span>Preview</span>
+            </div>
+            <p className="form-intro">For a fictional business.</p>
+            <div className="form-row">
+              <label htmlFor="lead-name">
+                Your name <span>*</span>
+                <input id="lead-name" name="name" required pattern=".*\S.*" maxLength={100} placeholder="Jane Doe" />
+              </label>
+              <label htmlFor="lead-email">
+                Email address <span>*</span>
+                <input id="lead-email" name="email" type="email" required maxLength={254} placeholder="jane@example.com" />
+              </label>
+            </div>
+            <div className="form-row">
+              <label htmlFor="lead-company">
+                Company <span className="optional">Optional</span>
+                <input id="lead-company" name="company" maxLength={150} placeholder="Doe Home Services" />
+              </label>
+              <label htmlFor="lead-domain">
+                Website <span className="optional">Optional</span>
+                <input id="lead-domain" name="domain" maxLength={150} placeholder="example.com" />
+              </label>
+            </div>
+            <label htmlFor="lead-source">
+              How did you hear about us? <span>*</span>
+              <select id="lead-source" name="source" required defaultValue="">
+                <option value="" disabled>
+                  Choose one
+                </option>
+                {LEAD_SOURCES.map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button className="button primary form-submit" type="submit">
+              See where this lead goes <ArrowRight size={18} />
+            </button>
+          </form>
+        )}
+      </div>
+    </section>
+  );
 }
 
 function BriefForm() {

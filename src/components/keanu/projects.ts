@@ -18,6 +18,7 @@ export type Project = {
   shot: string;
   lanes: Lane[];
   caveat?: string;
+  leadForm?: boolean;
 };
 
 export const PROJECTS: Project[] = [
@@ -38,7 +39,7 @@ export const PROJECTS: Project[] = [
     shot: "/projects/thumbs/front-desk",
     lanes: [
       {
-        src: "/projects/front-desk-booking.png",
+        src: "/projects/full/front-desk-booking.webp",
         label: "Booking",
         summary: "A patient writes in website chat. One agent runs the appointment.",
         steps: [
@@ -49,7 +50,7 @@ export const PROJECTS: Project[] = [
         ],
       },
       {
-        src: "/projects/front-desk-error.png",
+        src: "/projects/full/front-desk-errors.webp",
         label: "Errors",
         summary: "If another workflow fails, this one catches it so the rest keep running.",
         steps: [
@@ -60,7 +61,7 @@ export const PROJECTS: Project[] = [
         ],
       },
       {
-        src: "/projects/front-desk-reminders.png",
+        src: "/projects/full/front-desk-reminders.webp",
         label: "Reminders",
         summary: "Two clocks. Nobody on staff has to send these emails.",
         steps: [
@@ -70,7 +71,7 @@ export const PROJECTS: Project[] = [
         ],
       },
       {
-        src: "/projects/front-desk-leads.png",
+        src: "/projects/full/front-desk-leads.webp",
         label: "Leads",
         summary: "A form on the website becomes a row, a reply, and a ping to staff.",
         steps: [
@@ -100,7 +101,7 @@ export const PROJECTS: Project[] = [
     shot: "/projects/thumbs/cv-screening",
     lanes: [
       {
-        src: "/projects/cv-approval.jpg",
+        src: "/projects/full/cv-approval.webp",
         label: "Approval email",
         caption: "A sample candidate. The AI only suggests, and the recruiter's click decides.",
         summary: "The recruiter gets the score, what the candidate meets, what is missing, and two buttons.",
@@ -112,7 +113,7 @@ export const PROJECTS: Project[] = [
         ],
       },
       {
-        src: "/projects/cv-workflow.png",
+        src: "/projects/full/cv-workflow.webp",
         label: "Workflow",
         summary: "One path from the form to the final decision, with a log at each stage.",
         steps: [
@@ -123,7 +124,7 @@ export const PROJECTS: Project[] = [
         ],
       },
       {
-        src: "/projects/cv-log.jpg",
+        src: "/projects/full/cv-log.webp",
         label: "Log",
         caption: "Sample candidates. Each row shows the outcome and the AI's score.",
         summary: "Every candidate has one row, so nobody is read twice and every decision is recorded.",
@@ -153,7 +154,7 @@ export const PROJECTS: Project[] = [
     lanes: [
       {
         label: "CRM & pipelines",
-        src: "/projects/home-tours-pipeline.jpg",
+        src: "/projects/full/home-tours-pipeline.webp",
         caption: "Home Tours - Buyers: Alex Test in Registered and Jane Test in Confirmed. Six columns are visible; Closed is documented in the checklist.",
         summary: "Organized a Home Tours demo account using contact fields, tags, notes, and opportunity cards.",
         steps: [
@@ -165,7 +166,7 @@ export const PROJECTS: Project[] = [
       },
       {
         label: "Tasks & notes",
-        src: "/projects/home-tours-tasks.jpg",
+        src: "/projects/full/home-tours-tasks.webp",
         caption: "Jane’s Home Tours follow-up is complete; the headcount reminder is listed. Other rows belong to earlier exercises, including cleaning-service tasks.",
         summary: "Handled daily admin: follow-up tasks, due dates, contact links, attendance notes, and client handoffs.",
         steps: [
@@ -177,7 +178,7 @@ export const PROJECTS: Project[] = [
       },
       {
         label: "Calendar",
-        src: "/projects/home-tours-calendar.png",
+        src: "/projects/full/home-tours-calendar.webp",
         caption: "Saturday shows one class booking out of 20 capacity, at 10 PM Taipei time (9 AM Austin). The weekday blocks are separate recruitment sample bookings.",
         summary: "Configured a separate Saturday Home Bus Tour demo calendar and checked the Austin-to-Taipei time conversion.",
         steps: [
@@ -189,7 +190,7 @@ export const PROJECTS: Project[] = [
       },
       {
         label: "Registration funnel",
-        src: "/projects/home-tours-registration.jpg",
+        src: "/projects/full/home-tours-registration.webp",
         caption: "Register page from the three-step DEMO funnel. The architecture photo is the retained template image, not a real team or client.",
         summary: "Adapted a template into Tour Info → Register → Thank You, kept in preview. Registration is a request, not a confirmed seat.",
         steps: [
@@ -201,7 +202,7 @@ export const PROJECTS: Project[] = [
       },
       {
         label: "Draft workflow",
-        src: "/projects/home-tours-draft-workflow.jpg",
+        src: "/projects/full/home-tours-draft-workflow.webp",
         caption: "Home Tours - Funnel Registration (draft): filtered form trigger, tag, opportunity action, and internal notification. This is configuration evidence, not an execution log.",
         summary: "Configured a form-specific registration workflow. It remained Draft, with 0 enrolled and no workflow test.",
         steps: [
@@ -213,7 +214,7 @@ export const PROJECTS: Project[] = [
       },
       {
         label: "Completed checks",
-        src: "/projects/home-tours-validation.jpg",
+        src: "/projects/full/home-tours-validation.webp",
         caption: "An empty submission shows all five required-field errors and remains on the form. Screenshot from the recorded preview test.",
         summary: "The checklist documents the 20-step coached build and F0–F9 funnel checks. Form testing and workflow execution are separate.",
         steps: [
@@ -242,7 +243,7 @@ export const PROJECTS: Project[] = [
     shot: "/projects/thumbs/social-followup",
     lanes: [
       {
-        src: "/projects/social-followup.png",
+        src: "/projects/full/social-followup.webp",
         label: "Scenario",
         summary: "This is Make, not n8n. One webhook, one sheet, then a split by channel.",
         steps: [
@@ -254,7 +255,7 @@ export const PROJECTS: Project[] = [
         ],
       },
       {
-        src: "/projects/social-followup-sheet.png",
+        src: "/projects/full/social-followup-sheet.webp",
         label: "The sheet",
         summary: "This is the log the scenario writes to.",
         steps: [
@@ -280,14 +281,15 @@ export const PROJECTS: Project[] = [
     },
     tags: ["Zapier", "Google Sheets", "Gmail", "AI by Zapier"],
     shot: "/projects/thumbs/lead-routing",
+    leadForm: true,
     lanes: [
       {
-        src: "/projects/zapier-apollo.png",
+        src: "/projects/full/lead-routing.webp",
         label: "Paths",
         summary:
           "One webhook. Two paths. Referrals get a drafted email. Everyone else notifies sales.",
         steps: [
-          "The lead hits the webhook",
+          "A lead fills in the form, and it reaches the webhook",
           "If they are a referral: save the row, AI drafts a reply, Gmail sends it to the client",
           "Anyone else: Gmail notifies the sales team",
         ],
