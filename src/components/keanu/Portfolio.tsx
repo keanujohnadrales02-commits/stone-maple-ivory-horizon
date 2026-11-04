@@ -1,40 +1,97 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type PointerEvent as ReactPointerEvent } from "react";
 import {
   ArrowUpRight,
   ArrowRight,
-  ArrowDown,
+  ArrowLeft,
+  Award,
   Check,
   ChevronRight,
+  CodeXml,
+  Cpu,
+  KeyRound,
+  Network,
+  Send,
+  Webhook,
   X,
   Menu,
   Workflow,
   MessageSquare,
-  CalendarDays,
-  Route as RouteIcon,
   Expand,
   Copy,
   Download,
   Mail,
   CheckCheck,
-  Pause,
-  Play,
   RotateCcw,
   CalendarCheck,
   BellRing,
   Inbox,
   ShieldCheck,
+  type LucideIcon,
 } from "lucide-react";
 import { PROJECTS, type Project } from "./projects";
 import { CONTACT_EMAIL, ENQUIRY_WEBHOOK_URL } from "./contact-config";
 
 const tools = ["GoHighLevel", "n8n", "Make.com", "Zapier", "Google Sheets", "Other"];
+const navLinks = [
+  ["What I build", "build"],
+  ["Selected work", "work"],
+  ["How it works", "how"],
+];
+const UPWORK_URL = "https://www.upwork.com/freelancers/~01bdfaac6589e3786e";
 const outcomes = [
   "A patient messages the website chat, and one AI agent handles the appointment from there.",
-  "A full appointment pipeline in GoHighLevel, built in a practice account with fictional records.",
+  "A candidate fills in a form, AI scores the CV, and a person approves or rejects by email.",
+  "A full appointment pipeline in GoHighLevel, built in a demo account with fictional records.",
   "Every enquiry is logged, then answered on the channel it came from.",
   "Referrals get a faster, more personal path. Everyone else goes straight to sales.",
 ];
-const icons = [CalendarDays, Workflow, MessageSquare, RouteIcon];
+const roles = ["AI Automation Builder", "GoHighLevel Workflows", "n8n, Make.com & Zapier"];
+const certificates = [
+  { name: "HighLevel CRM", date: "May 12, 2026", src: "/certs/highlevel.png" },
+  { name: "AI Automation with n8n", date: "April 21, 2026", src: "/certs/n8n.png" },
+  { name: "No Code Automation with Make.com", date: "March 31, 2026", src: "/certs/make.png" },
+  { name: "No Code Automation with Zapier", date: "March 26, 2026", src: "/certs/zapier.png" },
+];
+const techStack: { name: string; logo?: string; mono?: string; Icon?: LucideIcon }[] = [
+  { name: "GoHighLevel", mono: "HL" },
+  { name: "n8n", logo: "n8n" },
+  { name: "Make.com", logo: "make" },
+  { name: "Zapier", logo: "zapier" },
+  { name: "Claude", logo: "claude" },
+  { name: "Claude Code", logo: "claude" },
+  { name: "ChatGPT", logo: "openai" },
+  { name: "Gemini", logo: "googlegemini" },
+  { name: "Vertex AI", logo: "googlecloud" },
+  { name: "VAPI", mono: "VA" },
+  { name: "Google Sheets", logo: "googlesheets" },
+  { name: "Gmail", logo: "gmail" },
+  { name: "Google Calendar", logo: "googlecalendar" },
+  { name: "Slack", logo: "slack" },
+  { name: "WhatsApp", logo: "whatsapp" },
+  { name: "Messenger", logo: "messenger" },
+  { name: "Typeform", mono: "TF" },
+  { name: "Airtable", logo: "airtable" },
+  { name: "Asana", logo: "asana" },
+  { name: "Apollo", mono: "AP" },
+  { name: "Xero", logo: "xero" },
+  { name: "Webhooks", Icon: Webhook },
+  { name: "REST APIs", Icon: Network },
+  { name: "JSON", logo: "json" },
+  { name: "OAuth 2.0", Icon: KeyRound },
+  { name: "Git & GitHub", logo: "github" },
+  { name: "VS Code", mono: "VS" },
+  { name: "React", logo: "react" },
+  { name: "TypeScript", logo: "typescript" },
+  { name: "Vercel", logo: "vercel" },
+];
+const portfolioTabs = [
+  { id: "projects", label: "Projects", Icon: CodeXml },
+  { id: "certificates", label: "Certificates", Icon: Award },
+  { id: "stack", label: "Tech Stack", Icon: Cpu },
+];
+const LOADER_MS = 1800;
+const LOADER_MAX_WAIT_MS = 3500;
+const prefersStill = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const jobs = [
   {
     icon: MessageSquare,
@@ -44,12 +101,12 @@ const jobs = [
   {
     icon: CalendarCheck,
     title: "Books into GoHighLevel",
-    body: "It checks availability, then books, moves or cancels the appointment on the right contact and calendar.",
+    body: "It checks open times, then books the visit on the right contact and calendar.",
   },
   {
     icon: BellRing,
-    title: "Confirms and reminds",
-    body: "A confirmation goes out when they book, a reminder before the visit, and a recall when they’re due back.",
+    title: "Reminds and recalls",
+    body: "A reminder goes out before the visit, and a recall when they’re due back.",
   },
   {
     icon: Inbox,
@@ -64,7 +121,6 @@ const jobs = [
 ];
 
 export function Portfolio() {
-  const [marqueePaused, setMarqueePaused] = useState(false);
   const [menu, setMenu] = useState(false);
   const [active, setActive] = useState("home");
   const [project, setProject] = useState<Project | null>(null);
@@ -93,6 +149,8 @@ export function Portfolio() {
   }, [menu]);
   return (
     <div className="portfolio">
+      <SiteLoader />
+      <Starfield />
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -105,15 +163,11 @@ export function Portfolio() {
             </span>
           </a>
           <nav aria-label="Main navigation" className="desktop-nav">
-            <a href="#build" aria-current={active === "build" ? "location" : undefined}>
-              What I build
-            </a>
-            <a href="#work" aria-current={active === "work" ? "location" : undefined}>
-              Selected work
-            </a>
-            <a href="#how" aria-current={active === "how" ? "location" : undefined}>
-              How it works
-            </a>
+            {navLinks.map(([label, id]) => (
+              <a key={id} href={`#${id}`} aria-current={active === id ? "location" : undefined}>
+                {label}
+              </a>
+            ))}
           </nav>
           <a className="nav-cta" href="#contact">
             Let’s talk <ArrowUpRight size={16} />
@@ -131,13 +185,13 @@ export function Portfolio() {
         </div>
         {menu && (
           <nav id="mobile-menu" className="mobile-menu container" aria-label="Mobile navigation">
-            {[
-              ["What I build", "build"],
-              ["Selected work", "work"],
-              ["How it works", "how"],
-              ["Start a project", "contact"],
-            ].map(([label, id]) => (
-              <a key={id} href={`#${id}`} onClick={() => setMenu(false)}>
+            {[...navLinks, ["Start a project", "contact"]].map(([label, id]) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                aria-current={active === id ? "location" : undefined}
+                onClick={() => setMenu(false)}
+              >
                 {label}
                 <ArrowUpRight size={18} />
               </a>
@@ -148,139 +202,48 @@ export function Portfolio() {
       <main id="main">
         <section id="home" className="hero-section container">
           <div className="hero-copy">
-            <p className="eyebrow">
-              <span className="status-dot" /> AI FRONT DESK FOR APPOINTMENT-BASED BUSINESSES
-            </p>
             <h1>
-              Every enquiry
+              <span>Welcome to</span>
               <br />
-              answered.
-              <br />
-              Every booking
-              <br />
-              <span>in the calendar.</span>
+              My Portfolio
             </h1>
+            <TypedRole />
             <p className="hero-description">
-              I build an AI front desk that replies to new enquiries, books the appointment into
-              GoHighLevel and sends the confirmation, without anyone on your team touching it.
+              I help small service businesses reply to new enquiries faster and book appointments
+              into GoHighLevel. We start with one small workflow, and a person checks the results
+              before anything runs on its own.
             </p>
             <div className="hero-actions">
               <a href="#work" className="button primary">
-                See how it works <ArrowDown size={18} />
+                See my work <ArrowRight size={17} />
               </a>
-              <a href="#contact" className="text-link">
-                Send me your setup <ArrowUpRight size={18} />
+              <a href="#contact" className="button secondary">
+                Contact me <Send size={16} />
               </a>
             </div>
-            <div className="hero-note">
-              <span className="note-line" /> It runs on self-hosted n8n with built-in error
-              handling. When a step fails, it gets caught and flagged, so a lead isn’t left waiting.
+            <div className="find-me">
+              <span>FIND ME</span>
+              <a href={UPWORK_URL} target="_blank" rel="noreferrer">
+                Upwork <ArrowUpRight size={15} />
+              </a>
             </div>
           </div>
-          <div
-            className="hero-art"
-            aria-label="Illustration of an enquiry becoming a booked appointment"
-          >
-            <img className="portal-art" src="/keanu-portal.jpg" alt="" fetchPriority="high" />
-            <div className="art-top">
-              <span className="mini-mark">K / SYSTEMS</span>
-              <span>01 — FRONT DESK</span>
-            </div>
-            <div className="workflow-illustration">
-              <div className="flow-label">FROM ENQUIRY TO BOOKED VISIT</div>
-              <div className="flow-node">
-                <span className="node-icon">
-                  <MessageSquare size={18} />
-                </span>
-                <div>
-                  <strong>A new enquiry</strong>
-                  <small>Website chat, any hour</small>
-                </div>
-                <span className="node-dot" />
-              </div>
-              <div className="flow-connector">
-                <span />
-              </div>
-              <div className="flow-node flow-main">
-                <span className="node-icon">
-                  <Workflow size={19} />
-                </span>
-                <div>
-                  <strong>AI front desk</strong>
-                  <small>Answer · check times · book</small>
-                </div>
-                <Check size={17} />
-              </div>
-              <div className="flow-connector">
-                <span />
-              </div>
-              <div className="flow-node flow-done">
-                <span className="node-icon">
-                  <CheckCheck size={20} />
-                </span>
-                <div>
-                  <strong>Booked in GoHighLevel</strong>
-                  <small>Confirmed, logged, reminded.</small>
-                </div>
-              </div>
-            </div>
-            <div className="art-bottom">
-              <span className="status-dot" /> ANSWERED IN SECONDS. BOOKED WITHOUT CHASING.
-            </div>
-          </div>
+          <HangingBadge />
         </section>
-        <div className="stack-strip container">
-          <span>THE TOOLS BEHIND THE WORK</span>
-          <div className="tools-marquee" role="region" aria-label="Tools I work with">
-            <div
-              className="tools-track"
-              style={{ animationPlayState: marqueePaused ? "paused" : undefined }}
-            >
-              {[0, 1].map((copy) => (
-                <div className="tools-group" key={copy} aria-hidden={copy === 1 ? true : undefined}>
-                  {["GoHighLevel", "n8n", "Make", "Zapier", "Google Sheets", "Slack"].map((tool) => (
-                    <span key={tool}>
-                      {tool === "n8n" && <Workflow size={20} />}
-                      {tool}
-                    </span>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-          <button
-            className="marquee-toggle"
-            type="button"
-            aria-label={marqueePaused ? "Play tools marquee" : "Pause tools marquee"}
-            onClick={() => setMarqueePaused((value) => !value)}
-          >
-            {marqueePaused ? <Play size={14} /> : <Pause size={14} />}
-          </button>
-        </div>
         <section id="build" className="container section-space">
+          <div className="section-heading">
+            <h2>What I Build</h2>
+            <p>One system. Five jobs it does every day.</p>
+          </div>
           <p className="positioning">
             Most lost appointments start with a slow reply. Someone asks a question at 9pm, nobody
             answers until morning, and by then they’ve booked somewhere else.{" "}
             <span>
-              I build one system that closes that gap. It answers, books, confirms, reminds and logs
-              everything, and it tells you when something breaks. I build that one system properly
-              every time, not a different project for every client.
+              I build one system that closes that gap. It answers, books, reminds and logs
+              everything, and it tells you when something breaks. We start with one part of it, test
+              it with you, and add more only when it proves useful.
             </span>
           </p>
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">01 / WHAT I BUILD</p>
-              <h2>
-                One system.
-                <br />
-                <span>Five jobs it does every day.</span>
-              </h2>
-            </div>
-            <p>
-              The AI Front Desk sits between your website and your calendar. It handles the routine
-              part of booking so your team only steps in when a person is needed.
-            </p>
-          </div>
           <div className="build-grid">
             {jobs.map((job, i) => (
               <article className={`build-card ${i === 0 ? "build-lead" : ""}`} key={job.title}>
@@ -304,7 +267,7 @@ export function Portfolio() {
                       </span>
                       <div>
                         <strong>Booked · Thursday 2:15</strong>
-                        <small>Added to GoHighLevel · confirmation sent</small>
+                        <small>Added to GoHighLevel</small>
                       </div>
                     </div>
                   </div>
@@ -316,14 +279,15 @@ export function Portfolio() {
             <div>
               <p className="eyebrow">BUILT FOR</p>
               <p>
-                Clinics, dental practices and other businesses whose revenue depends on booked
-                appointments.
+                Small service businesses that depend on booked appointments, like salons, cleaning
+                and home services, and tutors. For clinics, it handles general questions and booking
+                only, not medical records.
               </p>
             </div>
             <div>
               <p className="eyebrow">YOU DON’T NEED</p>
               <ul>
-                {["A new CRM", "A long discovery process", "Someone watching it all day"].map(
+                {["A big project to start", "Technical knowledge", "A long string of calls"].map(
                   (item) => (
                     <li key={item}>
                       <X size={13} aria-hidden="true" />
@@ -335,108 +299,16 @@ export function Portfolio() {
             </div>
           </div>
         </section>
-        <section id="work" className="work-section container section-space">
+        <section id="work" className="container section-space">
           <div className="section-heading">
-            <div>
-              <p className="eyebrow">02 / SELECTED WORK</p>
-              <h2>
-                Systems I’ve built.
-                <br />
-                <span>Shown as they are.</span>
-              </h2>
-            </div>
-            <p>
-              Actual setups and actual screenshots, showing what each one does, which tools it uses
-              and what has been tested.
-            </p>
+            <h2>Portfolio</h2>
           </div>
-          <div className="project-grid">
-            {PROJECTS.map((p, i) => {
-              const Icon = icons[i];
-              return (
-                <button
-                  key={p.id}
-                  className={`project-card ${p.lead ? "featured-project" : ""}`}
-                  onClick={() => setProject(p)}
-                  aria-label={`View ${p.title}`}
-                >
-                  <div className={`project-preview preview-${p.graph}`}>
-                    <div className="preview-toolbar">
-                      <span className="window-dots">
-                        <i />
-                        <i />
-                        <i />
-                      </span>
-                      <span>
-                        {p.kicker} / {p.graph === "ghl" ? "CRM & operations" : "Workflow canvas"}
-                      </span>
-                      <Expand size={13} />
-                    </div>
-                    <div className="preview-image">
-                      {p.shot ? <img src={p.shot} alt={`${p.short} setup preview`} loading="lazy" /> : (
-                        <div className="practice-overview">
-                          <span className="eyebrow">DEMO HOME TOURS</span>
-                          <strong>Daily operations.<br />Documented practice.</strong>
-                          <span>Contacts → Follow-ups → Appointments</span>
-                          <small>Checklist summary · screenshots pending review</small>
-                        </div>
-                      )}
-                    </div>
-                    {p.lead && (
-                      <span className="preview-caption">
-                        <span className="status-dot" /> CHAT · BOOKING · REMINDERS · ERRORS
-                      </span>
-                    )}
-                  </div>
-                  <div className="project-info">
-                    <div className="project-meta">
-                      <span>
-                        <Icon size={15} /> {p.kicker}
-                      </span>
-                      <span>{p.lead ? "FEATURED SYSTEM" : `0${i + 1}`}</span>
-                    </div>
-                    <h3>
-                      {p.short}
-                      <ArrowUpRight size={23} />
-                    </h3>
-                    <p>{outcomes[i]}</p>
-                    {p.lead && (
-                      <>
-                        <div className="project-facts">
-                          {p.facts?.map((fact) => (
-                            <div key={fact.label}><strong>{fact.value}</strong><span>{fact.label}</span></div>
-                          ))}
-                        </div>
-                        <p className="practice-note">
-                          Open the booking, reminders, leads and error workflows.
-                        </p>
-                      </>
-                    )}
-                    <span className="project-link">
-                      {p.lead
-                        ? "Explore the front desk"
-                        : p.graph === "ghl"
-                          ? "Explore the CRM setup"
-                          : "Explore the workflow"}
-                      <ArrowRight size={16} />
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+          <PortfolioTabs onOpen={setProject} />
         </section>
         <section id="how" className="how-section section-space">
           <div className="container">
             <div className="section-heading">
-              <div>
-                <p className="eyebrow">03 / HOW I WORK</p>
-                <h2>
-                  Built once. Built properly.
-                  <br />
-                  Then it <span>runs.</span>
-                </h2>
-              </div>
+              <h2>How It Works</h2>
               <p>
                 Most of the work happens before anything goes live. You fill in a short brief, I
                 handle the build, and you only hear from me when a decision needs you.
@@ -447,26 +319,26 @@ export function Portfolio() {
                 {
                   owner: "Your part",
                   title: "Brief",
-                  body: "You tell me how bookings work today: services, hours, calendar rules, and anything that should never be automated. A written brief replaces most of the calls.",
+                  body: "You show me how bookings work today, with one real example: services, hours, calendar rules, and anything that should never be automated. I write it down and you correct it.",
                   detail: "A written brief, not a string of calls",
                 },
                 {
                   owner: "My part",
                   title: "Build",
-                  body: "I set up the front desk on your account: the chat, the booking logic, confirmations, reminders and logging.",
+                  body: "I set up one workflow on your own account, starting with the request that takes the most time. More parts come only when this one proves useful.",
                   detail: "Set up on your own account",
                 },
                 {
                   owner: "My part",
                   title: "Break it on purpose",
-                  body: "Before launch I test the awkward cases: double bookings, missing details, reschedules, off-topic messages and failed steps. Anything the system shouldn’t decide goes to a person.",
+                  body: "Before launch I test it on your old messages and the awkward cases: double bookings, missing details, reschedules and failed steps. Anything the system shouldn’t decide goes to a person.",
                   detail: "Edge cases tested before launch",
                 },
                 {
                   owner: "Live",
-                  title: "Run",
-                  body: "It goes live with error alerts and a booking log, so you can see exactly what it did.",
-                  detail: "Error alerts and a booking log",
+                  title: "Drafts, then live",
+                  body: "For the first 2 weeks it prepares replies and you approve them. Then we look at the results together, and you decide what can run on its own.",
+                  detail: "Error alerts and a log stay on",
                 },
               ].map((step, i, steps) => (
                 <li className="step" key={step.title}>
@@ -495,7 +367,7 @@ export function Portfolio() {
               <ul>
                 {[
                   "Fewer missed enquiries",
-                  "A calendar that fills without anyone chasing",
+                  "Faster replies, at any hour",
                   "A record of every conversation",
                 ].map((goal) => (
                   <li key={goal}>
@@ -507,32 +379,33 @@ export function Portfolio() {
             </div>
           </div>
         </section>
-        <section id="contact" className="contact-section container section-space">
-          <div className="contact-copy">
-            <p className="eyebrow">04 / NEXT STEP</p>
-            <h2>
-              How many enquiries
-              <br />
-              go unanswered
-              <br />
-              <span>after hours?</span>
-            </h2>
-            <p>
-              Send a short brief about how people book with you now. I’ll reply with whether the AI
-              Front Desk fits and what setup would involve.
-            </p>
-            <div className="contact-promise">
-              <Workflow size={22} />
-              <div>
-                <strong>You don’t need a call to start.</strong>
-                <span>The brief covers what a discovery call would.</span>
+        <section id="contact" className="container section-space">
+          <div className="section-heading">
+            <h2>Contact Me</h2>
+          </div>
+          <div className="contact-section">
+            <div className="contact-copy">
+              <h3>How many enquiries go unanswered after hours?</h3>
+              <p>
+                Send a short brief about how people book with you now. I’ll reply with whether the AI
+                Front Desk fits and what setup would involve.
+              </p>
+              <div className="contact-promise">
+                <Workflow size={22} />
+                <div>
+                  <strong>You don’t need a call to start.</strong>
+                  <span>The brief covers what a discovery call would.</span>
+                </div>
+              </div>
+              <div className="find-me">
+                <span>FIND ME</span>
+                <a href={UPWORK_URL} target="_blank" rel="noreferrer">
+                  Upwork <ArrowUpRight size={15} />
+                </a>
               </div>
             </div>
-            <a href="#work" className="text-link">
-              See the AI Front Desk <ArrowUpRight size={17} />
-            </a>
+            <BriefForm />
           </div>
-          <BriefForm />
         </section>
       </main>
       <footer className="container site-footer">
@@ -543,10 +416,326 @@ export function Portfolio() {
         <a href="#home">
           Back to top <ArrowUpRight size={15} />
         </a>
-        <span>© {new Date().getFullYear()} Keanu</span>
+        <span>© {new Date().getFullYear()} Keanu John Adrales</span>
       </footer>
       <ProjectDialog project={project} onClose={() => setProject(null)} />
     </div>
+  );
+}
+
+function SiteLoader() {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    if (prefersStill()) {
+      setProgress(100);
+      return;
+    }
+    const start = performance.now();
+    let frame = 0;
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const ready = document.readyState === "complete" || elapsed > LOADER_MAX_WAIT_MS;
+      const next = Math.min(Math.round((elapsed / LOADER_MS) * 100), ready ? 100 : 95);
+      setProgress(next);
+      if (next < 100) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+  return (
+    <div className={`site-loader ${progress === 100 ? "done" : ""}`} role="status" aria-label="Loading">
+      <p className="loader-count" aria-hidden="true">
+        {progress}
+        <span>%</span>
+      </p>
+      <span className="loader-line" aria-hidden="true">
+        <i style={{ width: `${progress}%` }} />
+      </span>
+      <p className="loader-label" aria-hidden="true">
+        {progress < 50 ? "Loading data…" : progress < 100 ? "Loading assets…" : "Ready"}
+      </p>
+    </div>
+  );
+}
+
+function Starfield() {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const el = canvas.current!;
+    const ctx = el.getContext("2d")!;
+    const still = prefersStill();
+    const stars = Array.from({ length: window.innerWidth < 800 ? 70 : 150 }, () => ({
+      x: Math.random(),
+      y: Math.random(),
+      size: Math.random() * 0.9 + 0.3,
+      drift: Math.random() * 0.00012 + 0.00002,
+      phase: Math.random() * 6.3,
+    }));
+    const streak = { x: 0, y: 0, life: 0 };
+    let frame = 0;
+    const draw = (now: number) => {
+      const { width, height } = el;
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#dbe7ff";
+      for (const star of stars) {
+        star.y = (star.y - star.drift + 1) % 1;
+        ctx.globalAlpha = 0.25 + 0.7 * Math.abs(Math.sin(now / 1600 + star.phase));
+        ctx.beginPath();
+        ctx.arc(star.x * width, star.y * height, star.size, 0, 6.3);
+        ctx.fill();
+      }
+      if (streak.life > 0) {
+        streak.x += 7;
+        streak.y += 3;
+        streak.life -= 0.02;
+        ctx.globalAlpha = streak.life;
+        ctx.strokeStyle = "#bcd2ff";
+        ctx.beginPath();
+        ctx.moveTo(streak.x, streak.y);
+        ctx.lineTo(streak.x - 70, streak.y - 30);
+        ctx.stroke();
+      } else if (Math.random() < 0.004) {
+        Object.assign(streak, { x: Math.random() * width * 0.7, y: Math.random() * height * 0.5, life: 1 });
+      }
+      if (!still) frame = requestAnimationFrame(draw);
+    };
+    const resize = () => {
+      el.width = window.innerWidth;
+      el.height = window.innerHeight;
+      if (still) draw(0);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+    if (!still) frame = requestAnimationFrame(draw);
+    return () => {
+      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+  return <canvas ref={canvas} className="starfield" aria-hidden="true" />;
+}
+
+function TypedRole() {
+  const [text, setText] = useState(roles[0]);
+  useEffect(() => {
+    if (prefersStill()) return;
+    let role = 0;
+    let length = roles[0].length;
+    let deleting = true;
+    let timer = 0;
+    const tick = () => {
+      length += deleting ? -1 : 1;
+      setText(roles[role].slice(0, length));
+      let wait = deleting ? 35 : 70;
+      if (!deleting && length === roles[role].length) {
+        deleting = true;
+        wait = 1800;
+      } else if (deleting && length === 0) {
+        deleting = false;
+        role = (role + 1) % roles.length;
+        wait = 300;
+      }
+      timer = window.setTimeout(tick, wait);
+    };
+    timer = window.setTimeout(tick, LOADER_MS + 1800);
+    return () => clearTimeout(timer);
+  }, []);
+  return (
+    <p className="hero-role">
+      <span className="sr-only">{roles[0]}</span>
+      <span aria-hidden="true">
+        {text}
+        <i className="hero-caret" />
+      </span>
+    </p>
+  );
+}
+
+function HangingBadge() {
+  const rig = useRef<HTMLDivElement>(null);
+  const drag = useRef({ target: null as number | null, moved: false, startX: 0, startY: 0 });
+  const [flipped, setFlipped] = useState(false);
+  useEffect(() => {
+    if (prefersStill()) return;
+    const el = rig.current!;
+    let angle = 0.16;
+    let speed = 0;
+    let last = performance.now();
+    let frame = 0;
+    const tick = (now: number) => {
+      const step = Math.min((now - last) / 16.7, 3);
+      last = now;
+      const { target } = drag.current;
+      if (target !== null) {
+        speed = 0;
+        angle += (target - angle) * 0.25 * step;
+      } else {
+        speed += (-angle * 0.006 + Math.sin(now / 1100) * 0.00022) * step;
+        speed *= 0.992 ** step;
+        angle += speed * step;
+      }
+      el.style.setProperty("--swing", `${angle}rad`);
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+  function onPointerDown(e: ReactPointerEvent<HTMLButtonElement>) {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { target: null, moved: false, startX: e.clientX, startY: e.clientY };
+  }
+  function onPointerMove(e: ReactPointerEvent<HTMLButtonElement>) {
+    if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
+    const d = drag.current;
+    d.moved ||= Math.hypot(e.clientX - d.startX, e.clientY - d.startY) > 6;
+    if (!d.moved) return;
+    const box = rig.current!.parentElement!.getBoundingClientRect();
+    const angle = Math.atan2(box.left + box.width / 2 - e.clientX, e.clientY - box.top);
+    d.target = Math.max(-0.8, Math.min(0.8, angle));
+  }
+  function release() {
+    drag.current.target = null;
+  }
+  return (
+    <div className="badge-stage">
+      <div className="badge-rig" ref={rig}>
+        <span className="badge-strap" aria-hidden="true">
+          <span>KEANU · KEANU · KEANU · KEANU · KEANU · KEANU</span>
+        </span>
+        <span className="badge-clip" aria-hidden="true" />
+        <button
+          type="button"
+          className={`badge-card ${flipped ? "flipped" : ""}`}
+          aria-label={flipped ? "Show the front of the ID badge" : "Show the certificates on the back of the ID badge"}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={release}
+          onPointerCancel={release}
+          onClick={() => {
+            if (!drag.current.moved) setFlipped((value) => !value);
+            drag.current.moved = false;
+          }}
+        >
+          <span className="badge-inner">
+            <span className="badge-face badge-front">
+              <span className="badge-top">
+                <span>K / SYSTEMS</span>
+                <span>AI + CRM</span>
+              </span>
+              <b>AUTOMATION</b>
+              <span className="badge-mark">
+                <img src="/keanu-logo.svg" width="92" height="92" alt="" draggable={false} />
+                <span>KEANU JOHN ADRALES</span>
+              </span>
+              <span className="badge-foot">
+                <b>PORTFOLIO</b>
+                <small>Tap to flip</small>
+              </span>
+            </span>
+            <span className="badge-face badge-back">
+              <small>CERTIFICATES</small>
+              <b>Technical Virtual Assistants PH</b>
+              <span className="badge-certs">
+                {["HighLevel CRM", "AI Automation with n8n", "Make.com", "Zapier"].map((name) => (
+                  <span key={name}>
+                    <Check size={14} aria-hidden="true" /> {name}
+                  </span>
+                ))}
+              </span>
+              <small>GoHighLevel · n8n · Make · Zapier</small>
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PortfolioTabs({ onOpen }: { onOpen: (project: Project) => void }) {
+  const [tab, setTab] = useState("projects");
+  return (
+    <>
+      <div className="work-tabs" role="group" aria-label="Portfolio sections">
+        {portfolioTabs.map(({ id, label, Icon }) => (
+          <button key={id} type="button" aria-pressed={tab === id} onClick={() => setTab(id)}>
+            <Icon size={17} aria-hidden="true" /> {label}
+          </button>
+        ))}
+      </div>
+      <div className="work-panel" key={tab}>
+        {tab === "projects" && (
+          <div className="work-grid">
+            {PROJECTS.map((p, i) => (
+              <article className="work-card" key={p.id}>
+                <img
+                  src={`${p.shot}-742.webp`}
+                  srcSet={`${p.shot}-371.webp 371w, ${p.shot}-742.webp 742w`}
+                  sizes="(max-width: 640px) calc(100vw - 66px), (max-width: 1000px) calc(50vw - 80px), min(371px, calc(33.3vw - 74px))"
+                  width="371"
+                  height="232"
+                  alt={`${p.short} screenshot`}
+                  loading="lazy"
+                />
+                <div className="work-card-body">
+                  <p className="work-meta">
+                    {p.kicker} · {p.label}
+                  </p>
+                  <h3>{p.short}</h3>
+                  <p>{outcomes[i]}</p>
+                  <button
+                    type="button"
+                    className="details-button"
+                    aria-label={`Details: ${p.title}`}
+                    onClick={() => onOpen(p)}
+                  >
+                    Details <ArrowRight size={16} />
+                  </button>
+                </div>
+              </article>
+            ))}
+            <a className="work-card work-cta" href="#contact">
+              <h3>Have a workflow in mind?</h3>
+              <p>Tell me how one task runs today. We start small, and you see the results first.</p>
+              <span className="details-button">
+                Let’s talk <ArrowRight size={16} />
+              </span>
+            </a>
+          </div>
+        )}
+        {tab === "certificates" && (
+          <div className="cert-grid">
+            {certificates.map((cert) => (
+              <a className="cert-card" key={cert.src} href={cert.src} target="_blank" rel="noreferrer">
+                <img
+                  src={cert.src}
+                  width="2246"
+                  height="1588"
+                  alt={`${cert.name} certificate from Technical Virtual Assistants PH`}
+                />
+                <strong>{cert.name}</strong>
+                <small>Technical Virtual Assistants PH · {cert.date}</small>
+              </a>
+            ))}
+          </div>
+        )}
+        {tab === "stack" && (
+          <ul className="tool-grid">
+            {techStack.map(({ name, logo, mono, Icon }) => (
+              <li className="tool-tile" key={name}>
+                {logo && <img src={`/tools/${logo}.svg`} width="40" height="40" alt="" loading="lazy" />}
+                {mono && (
+                  <span className="tool-mono" aria-hidden="true">
+                    {mono}
+                  </span>
+                )}
+                {Icon && <Icon size={38} aria-hidden="true" />}
+                {name}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -560,6 +749,7 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
     const previous = document.activeElement as HTMLElement | null;
     const overflow = document.body.style.overflow;
     el.showModal();
+    el.scrollTop = 0;
     document.body.style.overflow = "hidden";
     const trapFocus = (event: KeyboardEvent) => {
       if (event.key !== "Tab") return;
@@ -593,32 +783,43 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
         e.preventDefault();
         onClose();
       }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
       aria-labelledby="case-title"
     >
       {project && lane && (
-        <div className="dialog-shell">
-          <div className="dialog-header">
-            <div>
-              <p className="eyebrow">PROJECT NOTES / {project.kicker}</p>
-              <h2 id="case-title">{project.title}</h2>
-            </div>
-            <button autoFocus className="icon-button" onClick={onClose} aria-label="Close project">
-              <X />
+        <div className="case-page container">
+          <div className="case-bar">
+            <button type="button" className="case-back" onClick={onClose}>
+              <ArrowLeft size={16} /> Back
             </button>
+            <span>Projects</span>
+            <ChevronRight size={15} aria-hidden="true" />
+            <strong>{project.short}</strong>
           </div>
-          <div className="case-navigation" aria-label="Project views">
-            {project.lanes.map((l, i) => (
-              <button key={l.label} aria-pressed={i === laneIndex} onClick={() => setLaneIndex(i)}>
-                {l.label}
-              </button>
-            ))}
-          </div>
-          <div className="case-content">
-            <div className="case-visual">
-              {lane.src ? <a
+          <div className="case-top">
+            <div>
+              <p className="eyebrow">
+                {project.kicker} · {project.label}
+              </p>
+              <h2 id="case-title">{project.title}</h2>
+              <p className="case-lede">{project.body}</p>
+              <h3>
+                <CodeXml size={19} aria-hidden="true" /> Technologies Used
+              </h3>
+              <div className="case-tags">
+                {project.tags.map((tag) => (
+                  <span key={tag}>{tag}</span>
+                ))}
+              </div>
+            </div>
+            <div className="case-shot">
+              <div className="case-navigation" role="group" aria-label="Project views">
+                {project.lanes.map((l, i) => (
+                  <button key={l.label} type="button" aria-pressed={i === laneIndex} onClick={() => setLaneIndex(i)}>
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+              <a
                 href={lane.src}
                 target="_blank"
                 rel="noreferrer"
@@ -628,55 +829,50 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
                 <span className="enlarge-label">
                   <Expand size={15} /> Open full-size image
                 </span>
-              </a> : (
-                <div className="practice-evidence-note">
-                  <Workflow size={36} aria-hidden="true" />
-                  <p className="eyebrow">SELF-DIRECTED PROJECT</p>
-                  <h3>Home Tours practice</h3>
-                  <p>This view summarizes the completed practice checklist. The linked screenshots have not yet been reviewed for this portfolio.</p>
-                  <p>No recreated interface or unrelated screenshot is presented as evidence.</p>
-                </div>
-              )}
+              </a>
               {lane.caption && <p className="evidence-caption">{lane.caption}</p>}
             </div>
-            <div className="case-description" aria-live="polite">
-              <p className="eyebrow">
-                {String(laneIndex + 1).padStart(2, "0")} / {lane.label}
-              </p>
-              <h3>Inside the workflow</h3>
+          </div>
+          <div className="case-bottom">
+            <div className="case-steps" aria-live="polite">
+              <h3>Inside the workflow: {lane.label}</h3>
               <p>{lane.summary}</p>
               <ul>
                 {lane.steps.map((step) => (
                   <li key={step}>
-                    <Check size={15} />
+                    <Check size={15} aria-hidden="true" />
                     <span>{step}</span>
                   </li>
                 ))}
               </ul>
-              <div className="case-tags">
-                {project.tags.map((tag) => (
-                  <span key={tag}>{tag}</span>
-                ))}
-              </div>
-              {project.caveat && <p className="case-caveat">{project.caveat}</p>}
             </div>
+            <dl className="case-brief">
+              {[
+                ["The problem", project.brief.problem],
+                ["My part", project.brief.role],
+                ["The solution", project.brief.solution],
+                ["The result", project.brief.outcome],
+              ].map(([term, text]) => (
+                <div key={term}>
+                  <dt>{term}</dt>
+                  <dd>{text}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
-          <div className="dialog-footer">
-            <span>{lane.src ? "Actual setup screenshot" : "Source: GHL Home Tours Practice checklist · October 4, 2026"}</span>
-            <button
-              className="text-link"
-              onClick={() => {
-                onClose();
-                document.getElementById("contact")?.scrollIntoView({
-                  behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-                    ? "instant"
-                    : "smooth",
-                });
-              }}
-            >
-              Discuss a similar workflow <ArrowUpRight size={16} />
-            </button>
-          </div>
+          {project.caveat && <p className="case-caveat">{project.caveat}</p>}
+          <button
+            type="button"
+            className="button primary"
+            onClick={() => {
+              onClose();
+              document.getElementById("contact")?.scrollIntoView({
+                behavior: prefersStill() ? "instant" : "smooth",
+              });
+            }}
+          >
+            Discuss a similar workflow <ArrowUpRight size={16} />
+          </button>
         </div>
       )}
     </dialog>
@@ -702,6 +898,13 @@ const sendNotes: Record<SendState, string> = {
   sending: "Sending your brief…",
   sent: "Sent. A short note is on its way.",
   failed: "The send failed. Your brief is still here.",
+};
+
+const sendHeadings: Record<SendState, [string, string]> = {
+  idle: ["", ""],
+  sending: ["SENDING", "Sending your brief…"],
+  sent: ["BRIEF SENT", "Your brief was sent."],
+  failed: ["NOT SENT YET", "Your brief didn’t send."],
 };
 
 const sendIntros: Record<SendState, string> = {
@@ -889,11 +1092,11 @@ function BriefForm() {
       </form>
       {brief !== null && (
         <div className="brief-result" ref={result} tabIndex={-1}>
-          <span className="result-icon">
-            <Check size={25} />
+          <span className={`result-icon result-${sendState}`}>
+            {sendState === "failed" ? <X size={25} /> : <Check size={25} />}
           </span>
-          <p className="eyebrow">READY TO SHARE</p>
-          <h3>Your brief is ready.</h3>
+          <p className="eyebrow">{sendHeadings[sendState][0]}</p>
+          <h3>{sendHeadings[sendState][1]}</h3>
           <p>{sendIntros[sendState]}</p>
           <pre>{brief}</pre>
           <div className="brief-actions">
