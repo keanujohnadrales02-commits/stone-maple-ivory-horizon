@@ -49,7 +49,7 @@ const certificates = [
   { name: "No Code Automation with Zapier", date: "March 26, 2026", src: "/certs/zapier.png" },
 ];
 const techStack: { name: string; logo?: string; mono?: string; Icon?: LucideIcon }[] = [
-  { name: "GoHighLevel", mono: "HL" },
+  { name: "GoHighLevel", logo: "gohighlevel" },
   { name: "n8n", logo: "n8n" },
   { name: "Make.com", logo: "make" },
   { name: "Zapier", logo: "zapier" },
