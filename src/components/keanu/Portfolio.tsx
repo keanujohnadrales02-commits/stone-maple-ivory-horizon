@@ -37,8 +37,9 @@ const navLinks = [
   ["How it works", "how"],
 ];
 const UPWORK_URL = "https://www.upwork.com/freelancers/~01bdfaac6589e3786e";
-// Setup price and reply time shown on the homepage.
-const SETUP_PRICE = "$300";
+// Prices and reply time shown on the homepage.
+const SETUP_PRICE = "$1,997";
+const MONTHLY_PRICE = "$397";
 const REPLY_TIME = "2 working days";
 const roles = ["AI Front Desk for GoHighLevel", "Fewer missed enquiries", "Set up in writing, with almost no calls"];
 const certificates = [
@@ -228,8 +229,9 @@ export function Portfolio() {
             I sell one thing: an AI front desk, set up for small service businesses that take
             appointments, like salons, home services, tutors and clinics.{" "}
             <span>
-              It runs on your own accounts and is tested before your customers use it. You pay one
-              fixed price, and we handle the work in writing. I work remotely from the Philippines.
+              It runs on your own accounts and is tested before your customers use it. You pay a
+              one-time setup fee and a monthly care plan, and we handle the work in writing. I work
+              remotely from the Philippines.
               I have 3 years in customer support at TDCX, so I know what a customer needs to hear and
               what a team needs to see.
             </span>
@@ -313,6 +315,8 @@ export function Portfolio() {
                   "Change or cancel existing appointments. It sends those requests to you.",
                   "Give medical, legal or financial advice.",
                   "Pretend to be a person. If someone asks, it says it is an AI assistant.",
+                  "Reply to phone calls, text messages, Facebook, Instagram or WhatsApp.",
+                  "Promise a certain number of bookings.",
                 ].map((item) => (
                   <li key={item}>
                     <X size={13} aria-hidden="true" />
@@ -321,12 +325,37 @@ export function Portfolio() {
                 ))}
               </ul>
             </div>
-            <div className="fit-cost">
-              <p className="eyebrow">COSTS</p>
-              <p>
-                Setup is one fixed price of {SETUP_PRICE}. You also pay for your own tools:
-                GoHighLevel, n8n and AI use. I tell you what to expect before you start.
-              </p>
+            <div>
+              <p className="eyebrow">PRICING</p>
+              <ul className="fit-plain">
+                {[
+                  `Setup: ${SETUP_PRICE}, one time. It covers one website and one calendar.`,
+                  `Monthly Care Plan: ${MONTHLY_PRICE} per month.`,
+                  "Your own tools are separate: GoHighLevel, n8n and AI use.",
+                ].map((item) => (
+                  <li key={item}>
+                    <Check size={13} aria-hidden="true" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="eyebrow">MONTHLY CARE PLAN</p>
+              <ul className="fit-plain">
+                {[
+                  "Watching error alerts and fixing problems with the system",
+                  "Small updates to your hours, services, prices and approved answers",
+                  "Testing again after each change",
+                  "A short monthly summary: chat bookings, problems found and changes made",
+                  `A written reply to your requests within ${REPLY_TIME}`,
+                ].map((item) => (
+                  <li key={item}>
+                    <Check size={13} aria-hidden="true" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </section>
@@ -357,8 +386,8 @@ export function Portfolio() {
                 {
                   owner: "My part",
                   title: "Get a written answer",
-                  body: `Within ${REPLY_TIME}, I reply with whether it fits, the fixed price and what I need from you. If it isn’t a good fit, I’ll tell you.`,
-                  detail: "Price and scope in writing",
+                  body: `Within ${REPLY_TIME}, I reply with whether it fits and what I need from you. If it isn’t a good fit, I’ll tell you.`,
+                  detail: "Scope in writing",
                 },
                 {
                   owner: "My part",
@@ -425,8 +454,8 @@ export function Portfolio() {
             <div className="contact-copy">
               <h3>Tell me how people book with you today</h3>
               <p>
-                Send the brief and I’ll reply in writing with whether it fits, the fixed price and
-                what happens next. There’s no call to book and no cost to ask.
+                Send the brief and I’ll reply in writing with whether it fits and what happens next.
+                There’s no call to book and no cost to ask.
               </p>
               <div className="contact-promise">
                 <Workflow size={22} />
@@ -733,7 +762,7 @@ function PortfolioTabs({ onOpen }: { onOpen: (project: Project) => void }) {
             ))}
             <a className="work-card work-cta" href="#contact">
               <h3>Want this on your website?</h3>
-              <p>Send a 2-minute brief. I’ll reply in writing with whether it fits and the fixed price.</p>
+              <p>Send a 2-minute brief. I’ll reply in writing with whether it fits and what happens next.</p>
               <span className="details-button">
                 Send a brief <ArrowRight size={16} />
               </span>

@@ -995,8 +995,6 @@ h2 span {
 .fit-bar > div { padding: 26px 28px; }
 .fit-bar > div:nth-child(even) { border-left: 1px solid #242e44; }
 .fit-bar > div:nth-child(n + 3) { border-top: 1px solid #242e44; }
-.fit-bar .fit-cost { grid-column: 1 / -1; }
-.fit-bar .fit-cost p:not(.eyebrow) { max-width: none; }
 .fit-bar .fit-plain { display: grid; gap: 9px; }
 .fit-bar .fit-plain li { align-items: flex-start; padding: 0; font-size: 14px; line-height: 1.6; border: 0; border-radius: 0; }
 .fit-bar .fit-plain svg { flex-shrink: 0; margin-top: 5px; }

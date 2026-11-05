@@ -13,7 +13,7 @@ export const Route = createRootRoute({
       { title: APP_NAME },
       {
         name: "description",
-        content: "A website chat that answers enquiries and books into GoHighLevel. Set up for you for one fixed price, in writing, with almost no calls.",
+        content: "A website chat that answers enquiries and books into GoHighLevel. Set up for you in writing, with almost no calls.",
       },
       { name: "theme-color", content: "#07040f" },
     ],
