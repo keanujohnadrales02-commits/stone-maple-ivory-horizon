@@ -3,7 +3,7 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import appCss from "../styles.css?url";
 
-const APP_NAME = "Keanu — AI Front Desk for Appointment Businesses";
+const APP_NAME = "AI Front Desk for Appointment Businesses | Keanu";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -13,7 +13,7 @@ export const Route = createRootRoute({
       { title: APP_NAME },
       {
         name: "description",
-        content: "An AI front desk that answers enquiries, books appointments into GoHighLevel, and sends confirmations and reminders. Built on n8n by Keanu.",
+        content: "A website chat that answers enquiries and books into GoHighLevel. Set up for you for one fixed price, in writing, with almost no calls.",
       },
       { name: "theme-color", content: "#07040f" },
     ],

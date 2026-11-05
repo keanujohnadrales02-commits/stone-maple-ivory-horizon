@@ -24,7 +24,6 @@ import {
   RotateCcw,
   CalendarCheck,
   BellRing,
-  Inbox,
   ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
@@ -38,14 +37,10 @@ const navLinks = [
   ["How it works", "how"],
 ];
 const UPWORK_URL = "https://www.upwork.com/freelancers/~01bdfaac6589e3786e";
-const outcomes = [
-  "A patient messages the website chat, and one AI agent handles the appointment from there.",
-  "A candidate fills in a form, AI scores the CV, and a person approves or rejects by email.",
-  "A full appointment pipeline in GoHighLevel, built in a demo account with fictional records.",
-  "Every enquiry is logged, then answered on the channel it came from.",
-  "Referrals get a faster, more personal path. Everyone else goes straight to sales.",
-];
-const roles = ["AI Automation Builder", "GoHighLevel Workflows", "n8n, Make.com & Zapier"];
+// Setup price and reply time shown on the homepage.
+const SETUP_PRICE = "$300";
+const REPLY_TIME = "2 working days";
+const roles = ["AI Front Desk for GoHighLevel", "Fewer missed enquiries", "Set up in writing, with almost no calls"];
 const certificates = [
   { name: "HighLevel CRM", date: "May 12, 2026", src: "/certs/highlevel.png" },
   { name: "AI Automation with n8n", date: "April 21, 2026", src: "/certs/n8n.png" },
@@ -95,28 +90,28 @@ const prefersStill = () => window.matchMedia("(prefers-reduced-motion: reduce)")
 const jobs = [
   {
     icon: MessageSquare,
-    title: "Answers enquiries",
-    body: "Website chat gets a reply in seconds, at any hour, based on your services, hours and rules.",
+    title: "Answers questions",
+    body: "It answers from a list you approve: hours, services, address and prices. If the answer isn’t on the list, it says so and offers to pass the question to you.",
   },
   {
     icon: CalendarCheck,
-    title: "Books into GoHighLevel",
-    body: "It checks open times, then books the visit on the right contact and calendar.",
+    title: "Offers real open times",
+    body: "It checks your GoHighLevel calendar and offers times in your time zone. It never makes up a time.",
+  },
+  {
+    icon: CheckCheck,
+    title: "Books only after a clear yes",
+    body: "It reads the details back and asks first. Then it saves the customer and books the appointment. A returning customer with the same email stays as one contact.",
   },
   {
     icon: BellRing,
-    title: "Reminds and recalls",
-    body: "A reminder goes out before the visit, and a recall when they’re due back.",
-  },
-  {
-    icon: Inbox,
-    title: "Captures every lead",
-    body: "Even when nobody books, the enquiry becomes a clean record and your staff get a notification.",
+    title: "Tells you what needs a person",
+    body: "You get an email for each new booking. You also get one when someone wants to cancel, reschedule or talk to a person.",
   },
   {
     icon: ShieldCheck,
-    title: "Catches its own errors",
-    body: "Failed steps are logged, retried when that’s safe, and sent to you if they matter.",
+    title: "Fails safely",
+    body: "If a step fails, it apologises and shares your booking page. It never says a booking worked when it didn’t. If the whole system has a problem, you get an alert.",
   },
 ];
 
@@ -203,22 +198,20 @@ export function Portfolio() {
         <section id="home" className="hero-section container">
           <div className="hero-copy">
             <h1>
-              <span>Welcome to</span>
-              <br />
-              My Portfolio
+              <span>An AI front desk</span> that answers enquiries and books into GoHighLevel
             </h1>
             <TypedRole />
             <p className="hero-description">
-              I help small service businesses reply to new enquiries faster and book appointments
-              into GoHighLevel. We start with one small workflow, and a person checks the results
-              before anything runs on its own.
+              It replies on your website at any hour, offers your real open times and books only
+              after the customer says yes. You get an email for every booking. I set it up for you
+              in writing, with almost no calls.
             </p>
             <div className="hero-actions">
-              <a href="#work" className="button primary">
-                See my work <ArrowRight size={17} />
+              <a href="#contact" className="button primary">
+                Send a 2-minute brief <Send size={16} />
               </a>
-              <a href="#contact" className="button secondary">
-                Contact me <Send size={16} />
+              <a href="#work" className="button secondary">
+                See the work <ArrowRight size={17} />
               </a>
             </div>
             <div className="find-me">
@@ -231,19 +224,20 @@ export function Portfolio() {
           <HangingBadge />
         </section>
         <section id="build" className="container section-space">
-          <div className="section-heading">
-            <h2>What I Build</h2>
-            <p>One system. Five jobs it does every day.</p>
-          </div>
           <p className="positioning">
-            Most lost appointments start with a slow reply. Someone asks a question at 9pm, nobody
-            answers until morning, and by then they’ve booked somewhere else.{" "}
+            I sell one thing: an AI front desk, set up for small service businesses that take
+            appointments, like salons, home services, tutors and clinics.{" "}
             <span>
-              I build one system that closes that gap. It answers, books, reminds and logs
-              everything, and it tells you when something breaks. We start with one part of it, test
-              it with you, and add more only when it proves useful.
+              It runs on your own accounts and is tested before your customers use it. You pay one
+              fixed price, and we handle the work in writing. I work remotely from the Philippines.
+              I have 3 years in customer support at TDCX, so I know what a customer needs to hear and
+              what a team needs to see.
             </span>
           </p>
+          <div className="section-heading">
+            <h2>What the AI Front Desk does</h2>
+            <p>One system. Five jobs.</p>
+          </div>
           <div className="build-grid">
             {jobs.map((job, i) => (
               <article className={`build-card ${i === 0 ? "build-lead" : ""}`} key={job.title}>
@@ -281,13 +275,28 @@ export function Portfolio() {
               <p>
                 Small service businesses that depend on booked appointments, like salons, cleaning
                 and home services, and tutors. For clinics, it handles general questions and booking
-                only, not medical records.
+                only. It is not HIPAA compliant and should not collect medical details.
               </p>
             </div>
             <div>
-              <p className="eyebrow">YOU DON’T NEED</p>
+              <p className="eyebrow">WHAT YOU NEED</p>
+              <ul className="fit-plain">
+                {[
+                  "A GoHighLevel account with a calendar",
+                  "A website where one piece of code can be added",
+                  "A Gmail account for your alerts",
+                ].map((item) => (
+                  <li key={item}>
+                    <Check size={13} aria-hidden="true" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="eyebrow">WHAT YOU DON’T NEED</p>
               <ul>
-                {["A big project to start", "Technical knowledge", "A long string of calls"].map(
+                {["Technical knowledge", "A long string of calls", "A big project to start"].map(
                   (item) => (
                     <li key={item}>
                       <X size={13} aria-hidden="true" />
@@ -297,48 +306,77 @@ export function Portfolio() {
                 )}
               </ul>
             </div>
+            <div>
+              <p className="eyebrow">WHAT IT DOESN’T DO</p>
+              <ul className="fit-plain">
+                {[
+                  "Change or cancel existing appointments. It sends those requests to you.",
+                  "Give medical, legal or financial advice.",
+                  "Pretend to be a person. If someone asks, it says it is an AI assistant.",
+                ].map((item) => (
+                  <li key={item}>
+                    <X size={13} aria-hidden="true" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="fit-cost">
+              <p className="eyebrow">COSTS</p>
+              <p>
+                Setup is one fixed price of {SETUP_PRICE}. You also pay for your own tools:
+                GoHighLevel, n8n and AI use. I tell you what to expect before you start.
+              </p>
+            </div>
           </div>
         </section>
         <section id="work" className="container section-space">
           <div className="section-heading">
-            <h2>Portfolio</h2>
+            <h2>Selected work</h2>
+            <p>My own builds, tested with sample data. Each one shows what was tested and what wasn’t.</p>
           </div>
           <PortfolioTabs onOpen={setProject} />
         </section>
         <section id="how" className="how-section section-space">
           <div className="container">
             <div className="section-heading">
-              <h2>How It Works</h2>
+              <h2>How it works, with almost no calls</h2>
               <p>
-                Most of the work happens before anything goes live. You fill in a short brief, I
-                handle the build, and you only hear from me when a decision needs you.
+                Everything is in writing, so you always have a record of what we agreed. If you ever
+                want a short call, you can ask for one.
               </p>
             </div>
             <ol className="steps">
               {[
                 {
                   owner: "Your part",
-                  title: "Brief",
-                  body: "You show me how bookings work today, with one real example: services, hours, calendar rules, and anything that should never be automated. I write it down and you correct it.",
-                  detail: "A written brief, not a string of calls",
+                  title: "Send the brief",
+                  body: "Tell me how people book with you today. It takes about 2 minutes.",
+                  detail: "No call needed",
                 },
                 {
                   owner: "My part",
-                  title: "Build",
-                  body: "I set up one workflow on your own account, starting with the request that takes the most time. More parts come only when this one proves useful.",
-                  detail: "Set up on your own account",
+                  title: "Get a written answer",
+                  body: `Within ${REPLY_TIME}, I reply with whether it fits, the fixed price and what I need from you. If it isn’t a good fit, I’ll tell you.`,
+                  detail: "Price and scope in writing",
                 },
                 {
                   owner: "My part",
-                  title: "Break it on purpose",
-                  body: "Before launch I test it on your old messages and the awkward cases: double bookings, missing details, reschedules and failed steps. Anything the system shouldn’t decide goes to a person.",
-                  detail: "Edge cases tested before launch",
+                  title: "Build and test",
+                  body: "You send your hours, services, prices and anything the assistant should never answer. You connect GoHighLevel by following my written steps, and you never send me a password. Then I build it and test a normal booking, a taken time, a repeat customer, a cancel request, a failed step and someone trying to break its rules.",
+                  detail: "Test results sent to you in writing",
+                },
+                {
+                  owner: "Your part",
+                  title: "Try it yourself",
+                  body: "You get a short screen recording and a private link. Try to book, then send me any changes in writing.",
+                  detail: "Nothing goes live until you approve it",
                 },
                 {
                   owner: "Live",
-                  title: "Drafts, then live",
-                  body: "For the first 2 weeks it prepares replies and you approve them. Then we look at the results together, and you decide what can run on its own.",
-                  detail: "Error alerts and a log stay on",
+                  title: "Launch and check",
+                  body: "It goes on your website with one piece of code. For the first 2 weeks, we check your bookings and alert emails, and I fix what needs fixing.",
+                  detail: "Error alerts stay on",
                 },
               ].map((step, i, steps) => (
                 <li className="step" key={step.title}>
@@ -367,8 +405,8 @@ export function Portfolio() {
               <ul>
                 {[
                   "Fewer missed enquiries",
-                  "Faster replies, at any hour",
-                  "A record of every conversation",
+                  "Clean bookings in GoHighLevel",
+                  "An alert when something fails",
                 ].map((goal) => (
                   <li key={goal}>
                     <Check size={15} aria-hidden="true" />
@@ -381,20 +419,20 @@ export function Portfolio() {
         </section>
         <section id="contact" className="container section-space">
           <div className="section-heading">
-            <h2>Contact Me</h2>
+            <h2>Next step</h2>
           </div>
           <div className="contact-section">
             <div className="contact-copy">
-              <h3>How many enquiries go unanswered after hours?</h3>
+              <h3>Tell me how people book with you today</h3>
               <p>
-                Send a short brief about how people book with you now. I’ll reply with whether the AI
-                Front Desk fits and what setup would involve.
+                Send the brief and I’ll reply in writing with whether it fits, the fixed price and
+                what happens next. There’s no call to book and no cost to ask.
               </p>
               <div className="contact-promise">
                 <Workflow size={22} />
                 <div>
                   <strong>You don’t need a call to start.</strong>
-                  <span>The brief covers what a discovery call would.</span>
+                  <span>The brief covers what a first call would.</span>
                 </div>
               </div>
               <div className="find-me">
@@ -665,7 +703,7 @@ function PortfolioTabs({ onOpen }: { onOpen: (project: Project) => void }) {
       <div className="work-panel" key={tab}>
         {tab === "projects" && (
           <div className="work-grid">
-            {PROJECTS.map((p, i) => (
+            {PROJECTS.map((p) => (
               <article className="work-card" key={p.id}>
                 <img
                   src={`${p.shot}-742.webp`}
@@ -681,7 +719,7 @@ function PortfolioTabs({ onOpen }: { onOpen: (project: Project) => void }) {
                     {p.kicker} · {p.label}
                   </p>
                   <h3>{p.short}</h3>
-                  <p>{outcomes[i]}</p>
+                  <p>{p.body}</p>
                   <button
                     type="button"
                     className="details-button"
@@ -694,10 +732,10 @@ function PortfolioTabs({ onOpen }: { onOpen: (project: Project) => void }) {
               </article>
             ))}
             <a className="work-card work-cta" href="#contact">
-              <h3>Have a workflow in mind?</h3>
-              <p>Tell me how one task runs today. We start small, and you see the results first.</p>
+              <h3>Want this on your website?</h3>
+              <p>Send a 2-minute brief. I’ll reply in writing with whether it fits and the fixed price.</p>
               <span className="details-button">
-                Let’s talk <ArrowRight size={16} />
+                Send a brief <ArrowRight size={16} />
               </span>
             </a>
           </div>
@@ -850,9 +888,8 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
             <dl className="case-brief">
               {[
                 ["The problem", project.brief.problem],
-                ["My part", project.brief.role],
-                ["The solution", project.brief.solution],
-                ["The result", project.brief.outcome],
+                ["What I built", project.brief.built],
+                ["What was tested", project.brief.tested],
               ].map(([term, text]) => (
                 <div key={term}>
                   <dt>{term}</dt>
@@ -872,7 +909,7 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
               });
             }}
           >
-            Discuss a similar workflow <ArrowUpRight size={16} />
+            Send a brief <ArrowUpRight size={16} />
           </button>
         </div>
       )}
@@ -1134,10 +1171,10 @@ function BriefForm() {
     <div className="brief-panel">
       <form ref={formRef} onSubmit={submit} hidden={brief !== null}>
         <div className="form-heading">
-          <h3>Tell me how you take bookings</h3>
+          <h3>Send your brief</h3>
           <span>Takes about 2 minutes</span>
         </div>
-        <p className="form-intro">A few details are all we need to start.</p>
+        <p className="form-intro">A few details are all I need.</p>
         <div className="form-row">
           <label htmlFor="brief-name">
             Your name <span>*</span>
@@ -1205,7 +1242,7 @@ function BriefForm() {
             minLength={20}
             maxLength={5000}
             rows={4}
-            placeholder="For example: Patients message us on the website and Facebook. We reply when we can and book them by hand in GoHighLevel."
+            placeholder="For example: Customers message us on the website and Facebook. We reply when we can and book them by hand in GoHighLevel."
             aria-describedby="brief-help"
             onInput={(e) => e.currentTarget.setCustomValidity("")}
           />
@@ -1217,7 +1254,7 @@ function BriefForm() {
           Send my brief <ArrowRight size={18} />
         </button>
         <p className="form-disclosure">
-          This goes straight to me. You can also copy or download it.
+          This goes straight to me. I reply in writing within {REPLY_TIME}.
         </p>
       </form>
       {brief !== null && (

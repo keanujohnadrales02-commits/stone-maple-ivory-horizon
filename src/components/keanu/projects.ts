@@ -13,7 +13,7 @@ export type Project = {
   short: string;
   label: string;
   body: string;
-  brief: { problem: string; role: string; solution: string; outcome: string };
+  brief: { problem: string; built: string; tested: string };
   tags: string[];
   shot: string;
   lanes: Lane[];
@@ -25,15 +25,14 @@ export const PROJECTS: Project[] = [
   {
     id: "front-desk",
     kicker: "n8n",
-    title: "AI Front Desk for a Dental Practice",
+    title: "AI Front Desk",
     short: "AI Front Desk",
     label: "Demo build",
-    body: "Chat books the visit. Reminders, leads, and an error lane sit beside it.",
+    body: "Answers on the website, offers real open times and books into GoHighLevel after a clear yes.",
     brief: {
-      problem: "Patients ask questions after hours, and nobody replies until morning.",
-      role: "I planned the flow and built it in n8n with AI help. I wrote and tested the agent's rules.",
-      solution: "A website chat answers from a knowledge table, checks live GoHighLevel availability, and books only after a clear yes.",
-      outcome: "Tested from the live site in October 2026: confirmed appointments and no duplicate contacts. This is a demo for a fictional clinic, not paid client work.",
+      problem: "People ask to book after hours, and nobody replies until morning.",
+      built: "A website chat in n8n with Claude. It checks live GoHighLevel availability, saves the customer, books the visit and emails the owner. I built it with AI help and wrote and tested the agent's rules.",
+      tested: "The first version, for a fictional clinic, was tested from a live site in October 2026: appointments confirmed, with no duplicate contacts. A newer version was tested with a fictional salon in November 2026: correct time zone, no booking without a yes, taken times refused, repeat customers kept as one contact, cancel requests emailed to the owner, and rule-breaking requests refused. This is not paid client work.",
     },
     tags: ["n8n", "Anthropic", "GoHighLevel", "Gmail", "Sheets"],
     shot: "/projects/thumbs/front-desk",
@@ -41,6 +40,7 @@ export const PROJECTS: Project[] = [
       {
         src: "/projects/full/front-desk-booking.webp",
         label: "Booking",
+        caption: "First version, built for a fictional clinic.",
         summary: "A patient writes in website chat. One agent runs the appointment.",
         steps: [
           "Checks open times in GoHighLevel",
@@ -52,6 +52,7 @@ export const PROJECTS: Project[] = [
       {
         src: "/projects/full/front-desk-errors.webp",
         label: "Errors",
+        caption: "First version, built for a fictional clinic.",
         summary: "If another workflow fails, this one catches it so the rest keep running.",
         steps: [
           "Classifies what broke",
@@ -61,18 +62,9 @@ export const PROJECTS: Project[] = [
         ],
       },
       {
-        src: "/projects/full/front-desk-reminders.webp",
-        label: "Reminders",
-        summary: "Two clocks. Nobody on staff has to send these emails.",
-        steps: [
-          "Every day at 8am: people with a visit in the next 1–2 days get a reminder",
-          "Every Monday at 8am: people from about six months ago get a recall",
-          "Each send is written back to the patient sheet",
-        ],
-      },
-      {
         src: "/projects/full/front-desk-leads.webp",
         label: "Leads",
+        caption: "First version, built for a fictional clinic.",
         summary: "A form on the website becomes a row, a reply, and a ping to staff.",
         steps: [
           "The form posts into n8n",
@@ -90,12 +82,11 @@ export const PROJECTS: Project[] = [
     title: "CV Screening with Recruiter Approval",
     short: "CV Screening + Approval",
     label: "Own build",
-    body: "AI scores each CV. A person approves or rejects by email before anything is decided.",
+    body: "AI scores each CV. A recruiter makes the decision with one click in an email.",
     brief: {
       problem: "A recruiter has to read every CV by hand, and good candidates can be missed or answered late.",
-      role: "I chose the design and built it in n8n with AI help. I approved and rejected the test candidates myself and checked every result.",
-      solution: "A form sends each candidate to n8n. It skips duplicates, Claude scores the CV in a fixed format, and the recruiter clicks Shortlist or Reject in an email.",
-      outcome: "Live since October 29, 2026, with sample candidates. Tested live: shortlisted, rejected, duplicate, no decision in time, and a forced error that sends an alert.",
+      built: "A form sends each candidate to n8n. It skips duplicates, Claude scores the CV in a fixed format, and the recruiter clicks Shortlist or Reject. I built it with AI help and checked every result.",
+      tested: "Live since October 29, 2026, with sample candidates. Tested live: shortlisted, rejected, duplicate, no decision in time, and a forced error that sends an alert.",
     },
     tags: ["n8n", "Claude", "Gmail", "Data tables", "Human approval"],
     shot: "/projects/thumbs/cv-screening",
@@ -138,16 +129,15 @@ export const PROJECTS: Project[] = [
   {
     id: "ghl-appointment-management",
     kicker: "GoHighLevel",
-    title: "GoHighLevel CRM & Appointment Setup",
+    title: "GoHighLevel CRM and Calendar Setup",
     short: "CRM & Calendar Setup",
     label: "Own build",
     shot: "/projects/thumbs/crm-setup",
-    body: "My own Home Tours build: organize contacts, track registrations, manage follow-ups, and schedule appointments.",
+    body: "One GoHighLevel account for registrations, follow-ups, attendance and bookings with limited seats.",
     brief: {
-      problem: "A tour business needs one place for registrations, follow-ups, attendance and bookings.",
-      role: "I set up the pipelines, fields, calendar, funnel and draft workflow during my training, with coaching, and documented each check.",
-      solution: "A GoHighLevel account with a pipeline, tags and custom fields, a capacity calendar, and a 3-step registration funnel.",
-      outcome: "A controlled form submission was checked. The registration workflow stayed in Draft and was not run. Contacts are fictional.",
+      problem: "A tour business needs one place to track who registered, who was confirmed and who came.",
+      built: "Pipelines, tags, custom fields, a capacity calendar, a 3-step registration funnel and a draft workflow, set up during my training with coaching. I documented each check.",
+      tested: "A controlled form submission was checked. The registration workflow stayed in Draft and was not run. Contacts are fictional.",
     },
     tags: ["CRM administration", "Follow-up tasks", "Scheduling", "Client updates"],
     caveat: "My own build with fictional contacts for DEMO Home Tours, done during training. CRM and funnel work documented in an October 4–5, 2026 checklist, with original setup screenshots. A controlled form submission was checked; the workflow was not run. No paid client work or live results are claimed. The registration workflow remained Draft, with 0 enrolled and no verified end-to-end automation.",
@@ -232,12 +222,11 @@ export const PROJECTS: Project[] = [
     title: "Enquiry to Social Follow-up",
     short: "Social Follow-Up",
     label: "Own build",
-    body: "Enquiry is logged, then answered on email, Messenger, or WhatsApp.",
+    body: "Saves each enquiry, then replies on the channel it came from: email, Messenger or WhatsApp.",
     brief: {
       problem: "Enquiries come from different channels, and replies can get missed.",
-      role: "I built and configured the scenario in Make.com.",
-      solution: "One webhook saves each enquiry to a sheet, then replies on the channel it came from.",
-      outcome: "Set up and configured. It has no recorded runs with real customers.",
+      built: "A Make.com scenario with one webhook. It saves each enquiry to a sheet, then replies on the right channel.",
+      tested: "Set up and configured. It has no recorded runs with real customers.",
     },
     tags: ["Make.com", "Google Sheets", "Gmail", "Messenger", "WhatsApp"],
     shot: "/projects/thumbs/social-followup",
@@ -272,12 +261,11 @@ export const PROJECTS: Project[] = [
     title: "Lead Routing with Priority Paths",
     short: "Lead Routing",
     label: "Own build",
-    body: "Referrals get a drafted email. Everyone else notifies sales.",
+    body: "Referrals get an AI-drafted email. Every other lead goes to the sales team.",
     brief: {
       problem: "Referrals should not wait in the same queue as every other lead.",
-      role: "I built and configured the Zap with its two paths.",
-      solution: "One webhook sends referrals to an AI drafted email, and every other lead to the sales team.",
-      outcome: "Set up and configured. It has no recorded runs with real customers.",
+      built: "A Zap with one webhook and two paths, plus a form that shows what each lead would send.",
+      tested: "Set up and configured as a draft. It has no recorded runs with real customers.",
     },
     tags: ["Zapier", "Google Sheets", "Gmail", "AI by Zapier"],
     shot: "/projects/thumbs/lead-routing",
